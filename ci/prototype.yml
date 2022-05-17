@@ -1,0 +1,36 @@
+stages:
+  - build # build stage is running on the Kubernetes cluster
+  - test  # test stage is running on Piz Daint
+
+variables:
+  PERSIST_IMAGE_NAME: ${CSCS_REGISTRY_PATH}/dcomex-prototype:1.0
+  GIT_SUBMODULE_STRATEGY: recursive
+
+build_software:
+  tags:
+    - docker_jfrog
+  stage: build
+  script:
+    - "true"
+  variables:
+    DOCKERFILE: ci/Dockerfile
+
+run_prototype_test:
+  tags:
+    - daint-container
+  stage: test
+  image: ${PERSIST_IMAGE_NAME}
+  script:
+    # here should go the commands to run the actual applications, `ls` is just to show what is already in the container, to get an idea
+    - ls -lh /src
+    - ls -lh --recursive /usr/local/
+
+  variables:
+    USE_MPI: 'YES'
+    SLURM_PARTITION: 'normal'
+    SLURM_CONSTRAINT: 'gpu'
+    SLURM_JOB_NUM_NODES: 1
+    SLURM_NTASKS: 1
+    PULL_IMAGE: 'YES'
+    CSCS_REGISTRY_LOGIN: 'YES'
+    SLURM_TIMELIMIT: '00:15:00'
