@@ -14,6 +14,7 @@ build_software:
     - "true"
   variables:
     DOCKERFILE: ci/Dockerfile
+    DOCKER_BUILD_ARGS: '["REGISTRY_PATH=${CSCS_REGISTRY_PATH}"]'
 
 run_prototype_test:
   tags:

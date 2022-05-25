@@ -1,4 +1,5 @@
-FROM finkandreas/dcomex-prototype_base:1.0
+ARG REGISTRY_PATH=finkandreas
+FROM $REGISTRY_PATH/dcomex-prototype_base:1.0
 
 COPY . /src
 
