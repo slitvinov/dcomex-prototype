@@ -40,7 +40,7 @@ def write_config_file(xcoords, ycoords,
 </MSolve4Korali>""", file=f)
 
 
-def parse_results(filename: str):
+def parse_msolve_results(filename: str):
     document = parse(filename)
     x = []
     y = []
@@ -66,19 +66,23 @@ def run_msolve_mock(xcoords, ycoords,
     os.makedirs(run_dir, exist_ok=True)
     os.chdir(run_dir)
 
-    input_file  = os.path.join(run_dir, "config.xml")
-    output_file = os.path.join(run_dir, "result.xml")
-    stdout_file = open(os.path.join(run_dir, "stdout.txt"), "w")
-    stderr_file = open(os.path.join(run_dir, "stderr.txt"), "w")
+    input_fname  = os.path.join(run_dir, "config.xml")
+    output_fname = os.path.join(run_dir, "result.xml")
+    stdout_fname = os.path.join(run_dir, "stdout.txt")
+    stderr_fname = os.path.join(run_dir, "stderr.txt")
 
-    write_config_file(xcoords, ycoords, parameters, input_file)
+    write_config_file(xcoords, ycoords, parameters, input_fname)
 
-    subprocess.call(['python3', os.path.join(script_dir, 'msolve_mock.py'),
-                     '--input-file', input_file,
-                     '--output-file', output_file],
-                    stdout=stdout_file, stderr=stderr_file)
+    with open(stdout_fname, "w") as stdout_file, \
+         open(stderr_fname, "w") as stderr_file:
 
-    x, y, T = parse_results(output_file)
+        subprocess.call(['python3', os.path.join(script_dir, 'msolve_mock.py'),
+                         '--input-file', input_fname,
+                         '--output-file', output_fname],
+                        stdout=stdout_file,
+                        stderr=stderr_file)
+
+    x, y, T = parse_msolve_results(output_fname)
 
     os.chdir(basedir)
     return x, y, T
@@ -98,21 +102,25 @@ def run_msolve(xcoords, ycoords,
     os.makedirs(run_dir, exist_ok=True)
     os.chdir(run_dir)
 
-    input_file  = os.path.join(run_dir, "config.xml")
-    output_file = os.path.join(run_dir, "result.xml")
-    stdout_file = open(os.path.join(run_dir, "stdout.txt"), "w")
-    stderr_file = open(os.path.join(run_dir, "stderr.txt"), "w")
+    input_fname  = os.path.join(run_dir, "config.xml")
+    output_fname = os.path.join(run_dir, "result.xml")
+    stdout_fname = os.path.join(run_dir, "stdout.txt")
+    stderr_fname = os.path.join(run_dir, "stderr.txt")
 
-    write_config_file(xcoords, ycoords, parameters, input_file)
+    write_config_file(xcoords, ycoords, parameters, input_fname)
 
     msolve_path = os.path.join(script_dir, '..', 'msolve', 'MSolveApp',
                                'ISAAR.MSolve.MSolve4Korali', 'bin', 'Debug', 'net6.0',
                                'ISAAR.MSolve.MSolve4Korali')
 
-    subprocess.call([msolve_path, input_file, output_file],
-                    stdout=stdout_file, stderr=stderr_file)
+    with open(stdout_fname, "w") as stdout_file, \
+         open(stderr_fname, "w") as stderr_file:
 
-    x, y, T = parse_results(output_file)
+        subprocess.call([msolve_path, input_fname, output_fname],
+                        stdout=stdout_file,
+                        stderr=stderr_file)
+
+    x, y, T = parse_msolve_results(output_fname)
 
     os.chdir(basedir)
     return x, y, T

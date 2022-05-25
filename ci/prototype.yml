@@ -21,9 +21,8 @@ run_prototype_test:
   stage: test
   image: ${PERSIST_IMAGE_NAME}
   script:
-    - cd /src/integration
-    - ./test_sample_mock.py
-    - ./test_sample_msolve.py
+    - cd /src/tests/units/
+    - ./run.sh
 
   variables:
     USE_MPI: 'YES'
