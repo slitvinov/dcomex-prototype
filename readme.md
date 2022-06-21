@@ -9,3 +9,5 @@ Directory structure:
 * `/ci`: definition of containerised build, test and deployment pipelines via CI/CD at CSCS.
 * `/tests`: unit and integration tests.
 * `/docs`: Sphinx documentation
+
+Online documentation is available at [ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest/).
