@@ -87,7 +87,6 @@ if __name__ == '__main__':
 
     k.run(e)
 
-
     # check the results
     samples = np.array(e["Results"]["Posterior Sample Database"])
 
@@ -97,7 +96,7 @@ if __name__ == '__main__':
     ref_theta1 = 0.2
     ref_theta2 = 0.7
 
-    tolerance = 5e-2
+    tolerance = 1e-1
 
     print("Inferred parameters:")
     print(f"theta1 = {mean_theta1}, theta2 = {mean_theta2}")

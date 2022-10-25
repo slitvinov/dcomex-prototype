@@ -7,6 +7,17 @@ script_dir = os.path.abspath(os.path.dirname(__file__))
 def write_config_file(xcoords, ycoords,
                       parameters: list,
                       filename: str):
+    """
+    Write an xml configuration file readable by MSolve.
+    The configuration describes the problem of a 2D plate
+    heated by a heat source, with temperature measurements
+    at given locations.
+
+    :param list xcoords: x coordinates of the temperature measurements
+    :param list ycoords: y coordinates of the temperature measurements
+    :param list parameters: position of the heat source
+    :param str filename: name of the configuration file to write
+    """
 
     theta1, theta2 = parameters
 
@@ -57,6 +68,10 @@ def run_msolve_mock(xcoords, ycoords,
                     generation: int,
                     sample_id: int,
                     parameters: list):
+    """
+    Run a mock version of msolve.
+    For debugging and testing purpose.
+    """
 
     basedir = os.getcwd()
     run_dir = os.path.join(basedir,
@@ -93,6 +108,22 @@ def run_msolve(xcoords, ycoords,
                generation: int,
                sample_id: int,
                parameters: list):
+    """
+    Run an instance of Msolve for given parameters.
+    This function performs the following steps:
+    - Create a directory unique to the sample
+    - Create an xml configuration file readable by Msolve
+    - Run Msolve
+    - Parse the xml file produced by MSolve
+    - Return the parsed results
+
+    :param list xcoords: x coordinates of the temperature measurements
+    :param list ycoords: y coordinates of the temperature measurements
+    :param int generation: the generation index of the korali experiment (used to create a unique directory)
+    :param int sample_id: the index of the korali sample (used to create a unique directory)
+    :param list parameters: position of the heat source
+    :return: the coordinates and values of the temperature measurements (x, y, T)
+    """
 
     basedir = os.getcwd()
     run_dir = os.path.join(basedir,
