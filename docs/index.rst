@@ -11,6 +11,7 @@ Welcome to DComEX Framework's documentation!
    :caption: Contents:
 
    integration
+   graph
 
 
 
