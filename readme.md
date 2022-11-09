@@ -1,14 +1,32 @@
-# DComEX Framework Prototype
+<p align="center"><img src="dcomex.png" alt="DComEX logo"/></p>
 
-The Prototype integration of the DComEX framework, to be deployed on CSCS' HPC systems.
+## Getting started
+To run Msolve and
+[korali](https://www.cse-lab.ethz.ch/korali)
+integration example use the
+[docker image](ci/Dockerfile),
+inside the container run
+```shell
+cd /src/tests/units
+./run.sh
+cd /src/tests/validation/inference_heat/
+OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
+```
+## Directory structure
 
-Directory structure:
-* `/korali`: git submodule for the version of korali used in the framework.
-* `/msolve`: NuGet configuration
-* `/integration`: Python code and configuration data used for integration of Msolve and Korali.
-* `/graph.py`: A module to sample Bayesian graphs.
-* `/ci`: definition of containerised build, test and deployment pipelines via CI/CD at CSCS.
-* `/tests`: unit and integration tests.
-* `/docs`: Sphinx documentation
+* [CI](ci): definition of containerised build, test and deployment
+  pipelines via CI/CD at CSCS
+* [docs](docs): Sphinx documentation
+* [examples](examples): tutorials and examples
+* [graph.py](graph.py): a module to sample Bayesian graphs
+* [integration](integration): code and configuration data used to
+  integrate Msolve and korali
+* [korali](korali): git submodule for the version of korali
+  used in the framework
+* [msolve](msolve):
+  [NuGet](https://www.nuget.org)
+  configuration
+* [tests](tests): unit and integration tests
 
-Online documentation is available at [ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest/).
+The online documentation is at
+[ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest/).
