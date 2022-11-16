@@ -78,7 +78,7 @@ def metropolis(fun, draws, init, scale, log=False):
 		xp = [e + random.gauss(0, s) for e, s in zip(x, scale)]
 		t += 1
 		pp = fun(xp)
-		if pp > pp or cond(pp, p):
+		if p > pp or cond(pp, p):
 			x, p = xp, pp
 			accept += 1
 	sys.stderr.write("graph.metropolis: accept = %g\n" % (accept / draws))
