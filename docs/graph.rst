@@ -20,6 +20,7 @@ Summary
 .. autosummary::
    graph.Integral
    graph.metropolis
+   graph.tmcmc
 
 Functions
 ---------
@@ -27,3 +28,4 @@ Functions
 .. autoclass:: graph.Integral
 	       :special-members: __call__
 .. autofunction:: graph.metropolis
+.. autofunction:: graph.tmcmc
