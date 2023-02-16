@@ -127,7 +127,9 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 	init : tuple
 	      the initial point
 	lo, hi : tuples
-	      the bounds of the initial distribution"""
+	      the bounds of the initial distribution
+        return_evidence : bool
+              if true returns a tuple (samples, evidence)"""
 
 	def inside(x):
 		for l, h, e in zip(lo, hi, x):
@@ -138,7 +140,7 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 	if scipy == None:
 		raise ModuleNotFoundError("tmcm needs scipy")
 	if np == None:
-		raise ModuleNotFoundError("tmcm needs scipy")
+		raise ModuleNotFoundError("tmcm needs nump")
 	eps = 1e-6
 	beta = 1
 	p = 0
@@ -176,6 +178,7 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 		ind = random.choices(range(draws),
 		                     cum_weights=kahan_cumsum(weight),
 		                     k=draws)
+		ind.sort()
 		delta = np.random.multivariate_normal([0] * d, sigma, size=draws)
 		for i, j in enumerate(ind):
 			xp = [a + b for a, b in zip(x[j], delta[i])]
@@ -194,16 +197,16 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 
 
 def cmaes(fun, x0, sigma, g_max, trace=False):
-	"""CMAES optimization
+	"""CMA-ES optimization
 
 	fun : callable
 	      a target function
 	x0 : tuple
-	      the initial poin
+	      the initial point
 	sigma : double
 	      initial variance
 	g_max : int
-              the bounds of the initial distribution
+              maximum generation
 	trace : bool
 	      return a trace of the algorithm (default: False)"""
 
@@ -217,6 +220,10 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
 		    math.fsum(w * a[i] for w, a in zip(weights, A)) for i in range(N)
 		]
 
+	if scipy == None:
+		raise ModuleNotFoundError("cmaes needs scipy")
+	if np == None:
+		raise ModuleNotFoundError("cmaes needs nump")
 	xmean, N = x0[:], len(x0)
 	lambd = 4 + int(3 * math.log(N))
 	mu = lambd // 2
