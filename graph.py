@@ -14,7 +14,7 @@ except ImportError:
 
 class Integral(object):
 	"""Caches the samples to evalute the integral several times
-	"""
+        """
 
 	def __init__(self,
 	             data_given_theta,
@@ -22,25 +22,28 @@ class Integral(object):
 	             method="metropolis",
 	             **options):
 		"""data_given_theta : callable
-		      the join probability of the observed data viewed
-		      as a function of parameter
-		theta_given_psi : callable
-		      conditional probability of parameters theta given
-		      hyper-parameter psi
-		method : str or callable, optional
-		      the type of the sampling algorithm to sample from
-		      data_given_theta. Can be one of
+                      the join probability of the observed data viewed
+                      as a function of parameter
+                theta_given_psi : callable
+                      conditional probability of parameters theta given
+                      hyper-parameter psi
+                method : str or callable, optional
+                      the type of the sampling algorithm to sample from
+                      data_given_theta. Can be one of
 
-		      - metropolis (default)
-		      - korali (WIP)
-		      - hamiltonian (WIP)
+                      - metropolis (default)
+                      - tmcmc
+                      - korali (WIP)
+                      - hamiltonian (WIP)
 
-		options : dict, optional
-		      a dictionary of options for the sampling algorithm
-		"""
+                options : dict, optional
+                      a dictionary of options for the sampling algorithm
+                """
 		self.theta_given_psi = theta_given_psi
 		if method == "metropolis":
 			self.samples = metropolis(data_given_theta, **options)
+		elif method == "tmcmc":
+			self.samples = tmcmc(data_given_theta, **options)
 		elif method == "korali":
 			self.samples = korali_sample(data_given_theta, **options)
 		else:
@@ -55,17 +58,25 @@ class Integral(object):
 def metropolis(fun, draws, init, scale, log=False):
 	"""Metropolis sampler
 
-	fun : callable
-	      unnormalized density or log unnormalized probability
-	      (see log)
-	draws : int
-	      the number of samples to draw
-	init : tuple
-	      the initial point
-	scale : tuple
-	      the scale of the proposal distribution (same size as init)
-	log : bool
-	      set True to assume log-probability (default: False)"""
+        Parameters
+        ----------
+        fun : callable
+              unnormalized density or log unnormalized probability
+              (see log)
+        draws : int
+              the number of samples to draw
+        init : tuple
+              the initial point
+        scale : tuple
+              the scale of the proposal distribution (same size as init)
+        log : bool
+              set True to assume log-probability (default: False)
+
+        Return
+        ----------
+        samples : list
+              list of samples"""
+
 	x = init[:]
 	p = fun(x)
 	t = 0
@@ -120,16 +131,23 @@ def kahan_sum(a):
 def tmcmc(fun, draws, lo, hi, return_evidence=False):
 	"""TMCMC sampler
 
-	fun : callable
-	      unnormalized density
-	draws : int
-	      the number of samples to draw
-	init : tuple
-	      the initial point
-	lo, hi : tuples
-	      the bounds of the initial distribution
+        Parameters
+        ----------
+        fun : callable
+              log-density
+        draws : int
+              the number of samples to draw
+        init : tuple
+              the initial point
+        lo, hi : tuples
+              the bounds of the initial distribution
         return_evidence : bool
-              if true returns a tuple (samples, evidence)"""
+              if true returns a tuple (samples, evidence) (default:
+              false)
+        Return
+        ----------
+        samples : list
+               samples"""
 
 	def inside(x):
 		for l, h, e in zip(lo, hi, x):
@@ -192,23 +210,28 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 			f2[i] = f[j]
 		if End == True:
 			return (x2, S) if return_evidence else x2
-		x = x2
-		f = f2
+		x2, x, f2, f = x, x2, f, f2
 
 
 def cmaes(fun, x0, sigma, g_max, trace=False):
 	"""CMA-ES optimization
 
-	fun : callable
-	      a target function
-	x0 : tuple
-	      the initial point
-	sigma : double
-	      initial variance
-	g_max : int
+        Parameters
+        ----------
+        fun : callable
+              a target function
+        x0 : tuple
+              the initial point
+        sigma : double
+              initial variance
+        g_max : int
               maximum generation
-	trace : bool
-	      return a trace of the algorithm (default: False)"""
+        trace : bool
+              return a trace of the algorithm (default: False)
+
+        Return
+        ----------
+        xmin : tuple"""
 
 	def cumulation(c, A, B):
 		alpha = 1 - c
