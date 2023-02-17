@@ -7,7 +7,7 @@ A prototyp for smTMCMC implementation.
 ```
 >> clear all; run_linear
 clear all; run_linear
-    2.0348   -2.2651    2.0981
+    1.8726   -1.4644    2.1020
 ```
 
 # Reference
