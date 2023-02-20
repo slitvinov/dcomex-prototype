@@ -37,8 +37,7 @@ class Integral(object):
                       - hamiltonian (WIP)
 
                 options : dict, optional
-                      a dictionary of options for the sampling algorithm
-                """
+                      a dictionary of options for the sampling algorithm"""
 		self.theta_given_psi = theta_given_psi
 		if method == "metropolis":
 			self.samples = metropolis(data_given_theta, **options)
@@ -128,26 +127,31 @@ def kahan_sum(a):
 	return s
 
 
-def tmcmc(fun, draws, lo, hi, return_evidence=False):
+def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
 	"""TMCMC sampler
 
         Parameters
         ----------
         fun : callable
-              log-density
+               log-probability
         draws : int
               the number of samples to draw
         init : tuple
               the initial point
         lo, hi : tuples
               the bounds of the initial distribution
+        beta : float
+              the coefficient to scale the proposal distribution
+              (default: 1)
         return_evidence : bool
               if true returns a tuple (samples, evidence) (default:
-              false)
+              False)
+        trace : bool
+              return a trace of the algorithm (default: False)
         Return
         ----------
         samples : list
-               samples"""
+               a list of samples"""
 
 	def inside(x):
 		for l, h, e in zip(lo, hi, x):
@@ -159,8 +163,8 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 		raise ModuleNotFoundError("tmcm needs scipy")
 	if np == None:
 		raise ModuleNotFoundError("tmcm needs nump")
+	betasq = beta * beta
 	eps = 1e-6
-	beta = 1
 	p = 0
 	S = 0
 	d = len(lo)
@@ -170,7 +174,13 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 	sigma = [[None] * d for i in range(d)]
 	f2 = np.empty_like(f)
 	End = False
+	Trace = []
+	accept = draws
 	while True:
+		if trace:
+			Trace.append((x[:], accept))
+		if End == True:
+			return Trace if trace else (x, S) if return_evidence else x
 		old_p, plo, phi = p, p, 2
 		while phi - plo > eps:
 			p = (plo + phi) / 2
@@ -191,25 +201,26 @@ def tmcmc(fun, draws, lo, hi, return_evidence=False):
 		x0 = [[a - b for a, b in zip(e, mu)] for e in x]
 		for l in range(d):
 			for k in range(l, d):
-				sigma[k][l] = sigma[l][k] = beta * beta * kahan_sum(
+				sigma[k][l] = sigma[l][k] = betasq * kahan_sum(
 				    w * e[k] * e[l] for w, e in zip(weight, x0))
 		ind = random.choices(range(draws),
 		                     cum_weights=kahan_cumsum(weight),
 		                     k=draws)
 		ind.sort()
-		delta = np.random.multivariate_normal([0] * d, sigma, size=draws)
+		sqrtC = np.real(scipy.linalg.sqrtm(sigma))
+		accept = 0
 		for i, j in enumerate(ind):
-			xp = [a + b for a, b in zip(x[j], delta[i])]
+			delta = [random.gauss(0, 1) for k in range(d)]
+			xp = [a + b for a, b in zip(x[j], sqrtC @ delta)]
 			if inside(xp):
 				fp = fun(xp)
 				if fp > f[j] or p * fp > p * f[j] + math.log(
 				    random.uniform(0, 1)):
 					x[j] = xp[:]
 					f[j] = fp
+					accept += 1
 			x2[i] = x[j][:]
 			f2[i] = f[j]
-		if End == True:
-			return (x2, S) if return_evidence else x2
 		x2, x, f2, f = x, x2, f, f2
 
 
@@ -260,7 +271,7 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
 	damps = 1 + 2 * max(0, math.sqrt((mueff - 1) / (N + 1)) - 1) + cs
 	chiN = math.sqrt(2) * math.gamma((N + 1) / 2) / math.gamma(N / 2)
 	ps, pc, C = [0] * N, [0] * N, np.identity(N)
-	trace0 = []
+	Trace = []
 	for gen in range(1, g_max + 1):
 		sqrtC = np.real(scipy.linalg.sqrtm(C))
 		x0 = [[random.gauss(0, 1) for d in range(N)] for i in range(lambd)]
@@ -282,6 +293,6 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
 			C1 = np.outer(pc, pc)
 			C = (1 - c1 - cmu) * C + c1 * (C1 + cc * (2 - cc) * C) + cmu * Cmu
 		if trace:
-			trace0.append(
+			Trace.append(
 			    (gen * lambd, ys[0], xs[0], sigma, C, ps, pc, Cmu, C1, xmean))
-	return trace0 if trace else xmean
+	return Trace if trace else xmean
