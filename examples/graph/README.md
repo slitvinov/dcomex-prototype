@@ -11,3 +11,5 @@
 
 [tmcmc0.py](tmcmc0.py)</br>
 [tmcmc1.py](tmcmc1.py)</br>
+[tmcmc2.py](tmcmc1.py)</br>
+<p align="center"><img src="tmcmc2.png"/></p>
