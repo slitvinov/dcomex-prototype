@@ -142,7 +142,7 @@ def langevin(fun, draws, init, dfun, h, log=False):
         h : float
               the step of the proposal
         dfun : callable
-              the of the log unnormalized probability
+              the log unnormalized probability
         log : bool
               set True to assume log-probability (default: False)
 
@@ -163,7 +163,7 @@ def langevin(fun, draws, init, dfun, h, log=False):
 	def sqdiff(a, b):
 		return kahan_sum((a - b)**2 for a, b in zip(a, b))
 
-	sqh = math.sqrt(h)
+	sq2h = math.sqrt(2 * h)
 	x = init[:]
 	y = [x + 1 / 2 * h * d for x, d in zip(x, dfun(x))]
 	p = fun(x)
@@ -176,10 +176,10 @@ def langevin(fun, draws, init, dfun, h, log=False):
 		if t >= draws:
 			break
 		t += 1
-		xp = [random.gauss(x, sqh) for x in x]
-		yp = [xp + 1 / 2 * h * d for xp, d in zip(xp, dfun(xp))]
+		xp = [random.gauss(y, sq2h) for y in y]
+		yp = [xp + h * d for xp, d in zip(xp, dfun(xp))]
 		pp = fun(xp)
-		if cond(pp, p, sqdiff(xp, y), sqdiff(x, yp)):
+		if cond(pp, p, sqdiff(xp, y) / (4 * h), sqdiff(x, yp) / (4 * h)):
 			x, p, y = xp, pp, yp
 			accept += 1
 	sys.stderr.write("graph.langevin: accept = %g\n" % (accept / draws))
