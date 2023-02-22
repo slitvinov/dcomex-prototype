@@ -11,5 +11,10 @@
 
 [tmcmc0.py](tmcmc0.py)</br>
 [tmcmc1.py](tmcmc1.py)</br>
-[tmcmc2.py](tmcmc1.py)</br>
+[tmcmc2.py](tmcmc2.py)</br>
 <p align="center"><img src="tmcmc2.png"/></p>
+
+[langevin0.py](langevin0.py)</br>
+<p align="center"><img src="langevin0.png"/></p>
+[langevin1.py](langevin1.py)</br>
+<p align="center"><img src="langevin1.png"/></p>
