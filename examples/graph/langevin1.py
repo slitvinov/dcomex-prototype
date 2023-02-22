@@ -15,7 +15,7 @@ def dfun(x):
 
 random.seed(123456)
 draws = 10000
-h = 0.1
+h = 0.75
 S0 = graph.langevin(fun, draws, [0, 0], dfun, h, log=True)
 plt.scatter(*zip(*S0), alpha=0.1)
 plt.savefig("langevin1.png")
