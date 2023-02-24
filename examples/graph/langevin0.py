@@ -6,7 +6,7 @@ import numpy as np
 
 
 def fun(x):
-	return -x[0]**2 / 2
+	return math.exp(-x[0]**2 / 2)
 
 
 def dfun(x):
@@ -14,13 +14,14 @@ def dfun(x):
 
 
 random.seed(123456)
+log = False
 draws = 1000000
-h = 1.5
+sigma = math.sqrt(3)
 step = [1.5]
-S0 = graph.langevin(fun, draws, [0], dfun, h, log=True)
-S1 = graph.metropolis(fun, draws, [0], step, log=True)
+S0 = graph.langevin(fun, draws, [0], dfun, sigma, log=log)
+S1 = graph.metropolis(fun, draws, [0], step, log=log)
 x = np.linspace(-4, 4, 100)
-y = [math.exp(fun([x])) / math.sqrt(2 * math.pi) for x in x]
+y = [fun([x]) / math.sqrt(2 * math.pi) for x in x]
 plt.hist([e for (e, ) in S0], 100, histtype='step', density=True, color='red')
 plt.hist([e for (e, ) in S1], 100, histtype='step', density=True, color='blue')
 plt.plot(x, y, '-k', alpha=0.5)

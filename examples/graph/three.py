@@ -31,4 +31,4 @@ samples = graph.metropolis(lambda psi: l0(psi) * prior(psi),
                            init=[50],
                            scale=[20])
 with open("samples.pkl", "wb") as f:
-	pickle.dump(samples, f)
+	pickle.dump(list(samples), f)

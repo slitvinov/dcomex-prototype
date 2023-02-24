@@ -20,3 +20,6 @@
 <p align="center"><img src="langevin1.png"/></p>
 [langevin2.py](langevin2.py)</br>
 <p align="center"><img src="langevin2.png"/></p>
+[langevin3.py](langevin3.py)</br>
+[langevin4.py](langevin4.py)</br>
+<p align="center"><img src="langevin4.png"/></p>
