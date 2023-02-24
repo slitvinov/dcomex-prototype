@@ -2,6 +2,7 @@ import sys
 import statistics
 import random
 import math
+import kahan
 try:
 	import scipy.special
 except ImportError:
@@ -12,33 +13,10 @@ except ImportError:
 	np = None
 
 
-def kahan_cumsum(a):
-	ans = []
-	s = 0.0
-	c = 0.0
-	for e in a:
-		y = e - c
-		t = s + y
-		c = (t - s) - y
-		s = t
-		ans.append(s)
-	return ans
-
-
-def kahan_sum(a):
-	s = 0.0
-	c = 0.0
-	for e in a:
-		y = e - c
-		t = s + y
-		c = (t - s) - y
-		s = t
-	return s
-
-
 class Integral(object):
 	"""Caches the samples to evalute the integral several times
         """
+
 	def __init__(self,
 	             data_given_theta,
 	             theta_given_psi,
@@ -64,9 +42,9 @@ class Integral(object):
                       a dictionary of options for the sampling algorithm"""
 		self.theta_given_psi = theta_given_psi
 		if method == "metropolis":
-			self.samples = metropolis(data_given_theta, **options)
+			self.samples = list(metropolis(data_given_theta, **options))
 		elif method == "langevin":
-			self.samples = langevin(data_given_theta, **options)
+			self.samples = list(langevin(data_given_theta, **options))
 		elif method == "tmcmc":
 			self.samples = tmcmc(data_given_theta, **options)
 		elif method == "korali":
@@ -101,6 +79,7 @@ def metropolis(fun, draws, init, scale, log=False):
         ----------
         samples : list
               list of samples"""
+
 	def flin(pp, p):
 		return pp > random.uniform(0, 1) * p
 
@@ -110,24 +89,22 @@ def metropolis(fun, draws, init, scale, log=False):
 	x = init[:]
 	p = fun(x)
 	t = 0
-	S = []
 	accept = 0
 	cond = flog if log else flin
 	while True:
-		S.append(x)
-		if t >= draws:
+		yield x
+		t += 1
+		if t == draws:
 			break
 		xp = [e + random.gauss(0, s) for e, s in zip(x, scale)]
-		t += 1
 		pp = fun(xp)
 		if pp > p or cond(pp, p):
 			x, p = xp, pp
 			accept += 1
 	sys.stderr.write("graph.metropolis: accept = %g\n" % (accept / draws))
-	return S
 
 
-def langevin(fun, draws, init, dfun, h, log=False):
+def langevin(fun, draws, init, dfun, sigma, log=False):
 	"""Metropolis-adjusted Langevin (MALA) sampler
 
         Parameters
@@ -150,9 +127,10 @@ def langevin(fun, draws, init, dfun, h, log=False):
         ----------
         samples : list
               list of samples"""
+
 	def flin(pp, p, d, dp):
-		a = pp * d
-		b = p * dp
+		a = pp * math.exp(d)
+		b = p * math.exp(dp)
 		return a > b or a > random.uniform(0, 1) * b
 
 	def flog(pp, p, d, dp):
@@ -161,29 +139,27 @@ def langevin(fun, draws, init, dfun, h, log=False):
 		return a > b or a > math.log(random.uniform(0, 1)) + b
 
 	def sqdiff(a, b):
-		return kahan_sum((a - b)**2 for a, b in zip(a, b))
+		return kahan.sum((a - b)**2 for a, b in zip(a, b))
 
-	sq2h = math.sqrt(2 * h)
+	s2 = sigma * sigma
 	x = init[:]
-	y = [x + 1 / 2 * h * d for x, d in zip(x, dfun(x))]
+	y = [x + s2 / 2 * d for x, d in zip(x, dfun(x))]
 	p = fun(x)
 	t = 0
-	S = []
 	accept = 0
 	cond = flog if log else flin
 	while True:
-		S.append(x)
-		if t >= draws:
-			break
+		yield x
 		t += 1
-		xp = [random.gauss(y, sq2h) for y in y]
-		yp = [xp + h * d for xp, d in zip(xp, dfun(xp))]
+		if t == draws:
+			break
+		xp = [random.gauss(y, sigma) for y in y]
+		yp = [xp + s2 / 2 * d for xp, d in zip(xp, dfun(xp))]
 		pp = fun(xp)
-		if cond(pp, p, sqdiff(xp, y) / (4 * h), sqdiff(x, yp) / (4 * h)):
+		if cond(pp, p, sqdiff(xp, y) / (2 * s2), sqdiff(x, yp) / (2 * s2)):
 			x, p, y = xp, pp, yp
 			accept += 1
 	sys.stderr.write("graph.langevin: accept = %g\n" % (accept / draws))
-	return S
 
 
 def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
@@ -211,6 +187,7 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
         ----------
         samples : list
                a list of samples"""
+
 	def inside(x):
 		for l, h, e in zip(lo, hi, x):
 			if e < l or e > h:
@@ -255,14 +232,14 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
 		dp = p - old_p
 		S += scipy.special.logsumexp(dp * f) - math.log(draws)
 		weight = scipy.special.softmax(dp * f)
-		mu = [kahan_sum(w * e[k] for w, e in zip(weight, x)) for k in range(d)]
+		mu = [kahan.sum(w * e[k] for w, e in zip(weight, x)) for k in range(d)]
 		x0 = [[a - b for a, b in zip(e, mu)] for e in x]
 		for l in range(d):
 			for k in range(l, d):
-				sigma[k][l] = sigma[l][k] = betasq * kahan_sum(
+				sigma[k][l] = sigma[l][k] = betasq * kahan.sum(
 				    w * e[k] * e[l] for w, e in zip(weight, x0))
 		ind = random.choices(range(draws),
-		                     cum_weights=kahan_cumsum(weight),
+		                     cum_weights=list(kahan.cumsum(weight)),
 		                     k=draws)
 		ind.sort()
 		sqrtC = np.real(scipy.linalg.sqrtm(sigma))
@@ -301,6 +278,7 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
         Return
         ----------
         xmin : tuple"""
+
 	def cumulation(c, A, B):
 		alpha = 1 - c
 		beta = math.sqrt(c * (2 - c) * mueff)

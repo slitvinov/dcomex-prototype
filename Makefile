@@ -4,7 +4,8 @@ PY = python3
 
 all: install
 M = \
-graph.py
+graph.py\
+kahan.py\
 
 install: $M
 	@p=`"$(PY)" -m site --user-site` || exit 2 && \
