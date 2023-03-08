@@ -10,6 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DotNumerics" Version="1.1.0" />
+    <PackageReference Include="MGroup.FEM.Structural" Version="0.2.0-unstable.118" />
+    <PackageReference Include="MGroup.MSolve.Discretization" Version="0.1.0-unstable.64" />
+    <PackageReference Include="MGroup.NumericalAnalyzers.Discretization" Version="0.2.0-unstable.59" />
+    <PackageReference Include="MGroup.Solvers" Version="0.2.0-unstable.19" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="ISAAR.MSolve.Analyzers">

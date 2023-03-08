@@ -36,6 +36,7 @@ namespace ISAAR.MSolve.MSolve4Korali
         InvalidParameters = -8,
         InvalidOutput = -9,
         ErrorWritingOutput = -10,
+        AnalysisError = -11,
         UnknownError = -99
     }
 
@@ -202,7 +203,7 @@ Korali4MSolve inputfile outputfile_Name
                             ))
                             .ToArray();
                         break;
-                    case "TumorGrowth":
+                    case "TUMORGROWTH":
                         problemType = ProblemType.TumorGrowth;
                         tumorProblemParameters = new TumorProblemParameters()
                         {
@@ -219,13 +220,6 @@ Korali4MSolve inputfile outputfile_Name
                         tumorProblemParameters.miTumor = Double.Parse(parametersElement.Element("mu").Value.Trim(), CultureInfo.InvariantCulture);
 
                         Environment.ExitCode = (int)ExitCode.InvalidOutput;
-                        pointsOfInterest = document.Root.Element("Output").Elements("TumorVolume")
-                            .Select(x => new Tuple<double, double>
-                            (
-                                Double.Parse(x.Attribute("X").Value, CultureInfo.InvariantCulture),
-                                Double.Parse(x.Attribute("Y").Value, CultureInfo.InvariantCulture)
-                            ))
-                            .ToArray();
                         break;
                     default:
                         Console.WriteLine($"Problem type '{problemTypeAsString}' is not recognized.");
@@ -315,6 +309,46 @@ Korali4MSolve inputfile outputfile_Name
                     }
 
                     xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndDocument();
+
+                    xmlWriter.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"XML writing of {outputFile} failed.\n\r{Enum.GetName(typeof(ExitCode), Environment.ExitCode)}\n\r{ex.Message}");
+                return false;
+            }
+            Console.WriteLine("Success writing output to xml");
+
+            return true;
+        }
+        private static bool WriteOutputToXml(double outputValue, double timesteps, bool runSuccess, string physicalQuantity)
+        {
+            Console.WriteLine("Writing output to xml...");
+            Environment.ExitCode = (int)ExitCode.ErrorWritingOutput;
+            var settings = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "\t",
+                NewLineChars = "\r\n",
+                NewLineHandling = NewLineHandling.Replace
+            };
+
+            try
+            {
+                using (var xmlWriter = XmlWriter.Create(outputFile, settings))
+                {
+                    xmlWriter.WriteStartDocument();
+
+                    xmlWriter.WriteStartElement("MSolve4Korali_output");
+                    xmlWriter.WriteAttributeString("version", "1.0");
+
+                    xmlWriter.WriteElementString(physicalQuantity, outputValue.ToString());
+                    xmlWriter.WriteElementString("Timeteps", timesteps.ToString());
+                    xmlWriter.WriteElementString("SolutionMsg", runSuccess ? "Success" : "Fail");
+
                     xmlWriter.WriteEndElement();
                     xmlWriter.WriteEndDocument();
 
@@ -429,52 +463,55 @@ Korali4MSolve inputfile outputfile_Name
 
             Dictionary<double, double[]> Solution = new Dictionary<double, double[]>();
 
-        var staggeredAnalyzer = new StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
-            for (int currentTimeStep = 0; currentTimeStep < tumorProblemParameters.totalTime / tumorProblemParameters.timeStep; currentTimeStep++)
+            var staggeredAnalyzer = new MGroup.NumericalAnalyzers.Staggered.StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
+            try
             {
-                equationModel.CurrentTimeStep = currentTimeStep;
-                equationModel.CreateModel(equationModel.ParentAnalyzers, equationModel.ParentSolvers);
-                staggeredAnalyzer.SolveCurrentStep();
-                var allValues = ((DOFSLog)equationModel.ParentAnalyzers[0].ChildAnalyzer.Logs[0]).DOFValues.Select(x => x.val).ToArray();
-
-                u1X[currentTimeStep] = allValues[0];
-                u1Y[currentTimeStep] = allValues[1];
-                u1Z[currentTimeStep] = allValues[2];
-
-                if (Solution.ContainsKey(currentTimeStep))
+                Environment.ExitCode = (int)ExitCode.InvalidParameters;
+                for (int currentTimeStep = 0; currentTimeStep < tumorProblemParameters.totalTime / tumorProblemParameters.timeStep; currentTimeStep++)
                 {
-                    Solution[currentTimeStep] = allValues;
-                    Console.WriteLine($"Time step: {currentTimeStep}");
+                    equationModel.CurrentTimeStep = currentTimeStep;
+                    equationModel.CreateModel(equationModel.ParentAnalyzers, equationModel.ParentSolvers);
+                    staggeredAnalyzer.SolveCurrentStep();
+
+                    var allValues = ((MGroup.NumericalAnalyzers.Logging.DOFSLog)equationModel.ParentAnalyzers[0].ChildAnalyzer.Logs[0]).DOFValues.Select(x => x.val).ToArray();
+
+                    u1X[currentTimeStep] = allValues[0];
+                    u1Y[currentTimeStep] = allValues[1];
+                    u1Z[currentTimeStep] = allValues[2];
+
+                    if (Solution.ContainsKey(currentTimeStep))
+                    {
+                        Solution[currentTimeStep] = allValues;
+                        Console.WriteLine($"Time step: {currentTimeStep}");
+                        Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
+                    }
+                    else
+                    {
+                        Solution.Add(currentTimeStep, allValues);
+                    }
+
+                    for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                    {
+                        (equationModel.ParentAnalyzers[j] as MGroup.NumericalAnalyzers.Dynamic.PseudoTransientAnalyzer).AdvanceStep();
+                    }
+
+                    for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                    {
+                        equationModel.AnalyzerStates[j] = equationModel.ParentAnalyzers[j].CreateState();
+                        equationModel.NLAnalyzerStates[j] = equationModel.NLAnalyzers[j].CreateState();
+                    }
+
+
                     Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
                 }
-                else
-                {
-                    Solution.Add(currentTimeStep, allValues);
-                }
-
-                for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
-                {
-                    (equationModel.ParentAnalyzers[j] as PseudoTransientAnalyzer).AdvanceStep();
-                }
-
-                for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
-                {
-                    equationModel.AnalyzerStates[j] = equationModel.ParentAnalyzers[j].CreateState();
-                    equationModel.NLAnalyzerStates[j] = equationModel.NLAnalyzers[j].CreateState();
-                }
-
-
-                Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
             }
-
-            var outputValues = new Dictionary<Tuple<double, double>, double>();
-            foreach (var timestep in Solution.Keys)
+            catch (Exception ex)
             {
-                outputValues.Add(new Tuple<double, double>(timestep, 0), Solution[timestep][0]);
+                Console.WriteLine($"Analysis failed on step {equationModel.CurrentTimeStep}.\n\r{Enum.GetName(typeof(ExitCode), Environment.ExitCode)}\n\r{ex.Message}");
+                return WriteOutputToXml(Solution[equationModel.CurrentTimeStep-1][0], equationModel.CurrentTimeStep-1, false, "Volume");
             }
 
-
-            return WriteOutputToXml(outputValues, "Volume");
+            return WriteOutputToXml(Solution[equationModel.CurrentTimeStep][0], equationModel.CurrentTimeStep, true, "Volume");
         }
 
         static void Main(string[] args)
