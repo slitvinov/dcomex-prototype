@@ -419,34 +419,49 @@ Korali4MSolve inputfile outputfile_Name
 
         private static bool SolveTumorGrowthProblem()
         {
-            Console.WriteLine("Solving problem...");
+			var equationModel = new MonophasicEquationModel(tumorProblemParameters);
+            var u1X = new double[(int)(totalTime / timeStep)];
+            var u1Y = new double[(int)(totalTime / timeStep)];
+            var u1Z = new double[(int)(totalTime / timeStep)];
 
-            var equationModel = new MonophasicEquationModel(tumorProblemParameters);
-            Dictionary<int, double> lambda = new Dictionary<int, double>(equationModel.Reader.ElementConnectivity.Count());
-            foreach (var elem in equationModel.Reader.ElementConnectivity)
+            var staggeredAnalyzer = new StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
+            for (currentTimeStep = 0; currentTimeStep < totalTime / timeStep; currentTimeStep++)
             {
-                lambda.Add(elem.Key, elem.Value.Item3 == 0 ? equationModel.CalculateLambda(currentTimeStep * timeStep) : 1d);
+                equationModel.CurrentTimeStep = currentTimeStep;
+                equationModel.CreateModel(equationModel.ParentAnalyzers, equationModel.ParentSolvers);
+                staggeredAnalyzer.SolveCurrentStep();
+                var allValues = ((DOFSLog)equationModel.ParentAnalyzers[0].ChildAnalyzer.Logs[0]).DOFValues.Select(x => x.val).ToArray();
+
+                u1X[currentTimeStep] = allValues[0];
+                u1Y[currentTimeStep] = allValues[1];
+                u1Z[currentTimeStep] = allValues[2];
+
+                if (Solution.ContainsKey(currentTimeStep))
+                {
+                    Solution[currentTimeStep] = allValues;
+                    Console.WriteLine($"Time step: {timeStep}");
+                    Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[timeStep])}");
+                }
+                else
+                {
+                    Solution.Add(currentTimeStep, allValues);
+                }
+
+                for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                {
+                    (equationModel.ParentAnalyzers[j] as PseudoTransientAnalyzer).AdvanceStep();
+                }
+
+                for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                {
+                    equationModel.AnalyzerStates[j] = equationModel.ParentAnalyzers[j].CreateState();
+                    equationModel.NLAnalyzerStates[j] = equationModel.NLAnalyzers[j].CreateState();
+                }
+
+                Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
             }
-            var model = new Model[] { EquationModels.MonophasicEquationModel.CreateElasticModelFromComsolFile(lambda), };
-            var solverFactory = new SkylineSolver.Factory() { FactorizationPivotTolerance = 1e-8 };
-            var algebraicModel = new[] { solverFactory.BuildAlgebraicModel(model[0]), };
-            var solver = new[] { solverFactory.BuildSolver(algebraicModel[0]), };
-            var problem = new[] { new ProblemStructural(model[0], algebraicModel[0], solver[0]), };
-            var linearAnalyzer = new LinearAnalyzer(algebraicModel[0], solver[0], problem[0]);
-            var analyzer = new StaticAnalyzer( algebraicModel[0], problem[0], linearAnalyzer);
-            analyzer.Initialize();
-            analyzer.Solve();
 
-            // var outputValues = new Dictionary<Tuple<double, double>, double>();
-            // foreach (var n in pointsOfInterest)
-            // {
-            //     var nearestNode = model.Nodes.Select(x => new { Node = x, Distance = Math.Sqrt(Math.Pow(n.Item1 - x.X1, 2) + Math.Pow(n.Item2 - x.X2, 2)) }).OrderBy(x => x.Distance).First().Node;
-            //     var dof = 0;
-            //     model.GlobalDofOrdering.GlobalFreeDofs.TryGetValue(nearestNode, ThermalDof.Temperature, out dof);
-            //     outputValues.Add(n, dof == 0 ? 0 : solver.LinearSystems[0].Solution[dof]);
-            // }
-
-            return WriteOutputToXml(outputValues, "Temperature");
+            return WriteOutputToXml(outputValues, "Volume");
         }
 
         static void Main(string[] args)
@@ -496,3 +511,4 @@ Korali4MSolve inputfile outputfile_Name
         }
     }
 }
+
