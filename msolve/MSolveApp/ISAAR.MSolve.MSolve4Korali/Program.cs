@@ -1,12 +1,14 @@
 ﻿using ISAAR.MSolve.Analyzers;
 using ISAAR.MSolve.Discretization;
 using ISAAR.MSolve.Discretization.FreedomDegrees;
+using ISAAR.MSolve.Discretization.Interfaces;
 using ISAAR.MSolve.Discretization.Mesh;
 using ISAAR.MSolve.FEM.Elements;
 using ISAAR.MSolve.FEM.Entities;
 using ISAAR.MSolve.FEM.Interfaces;
 using ISAAR.MSolve.LinearAlgebra;
 using ISAAR.MSolve.LinearAlgebra.Matrices;
+using ISAAR.MSolve.Logging;
 using ISAAR.MSolve.Materials;
 using ISAAR.MSolve.Problems;
 using ISAAR.MSolve.Solvers.Direct;
@@ -204,23 +206,24 @@ Korali4MSolve inputfile outputfile_Name
                         problemType = ProblemType.TumorGrowth;
                         tumorProblemParameters = new TumorProblemParameters()
                         {
-                            fileName= meshElement.Element("File").Value.Trim();
-                            kappaNormal= 0;
-                            miTumor= 0;
-                            timeStep= Double.Parse(physicsElement.Element("Timestep").Value.Trim(), CultureInfo.InvariantCulture);
-                            totalTime= Double.Parse(physicsElement.Element("Time").Value.Trim(), CultureInfo.InvariantCulture);
+                            fileName= meshElement.Element("File").Value.Trim(),
+                            kappaNormal= 0,
+                            miTumor= 0,
+                            timeStep= Double.Parse(physicsElement.Element("Timestep").Value.Trim(), CultureInfo.InvariantCulture),
+                            totalTime= Double.Parse(physicsElement.Element("Time").Value.Trim(), CultureInfo.InvariantCulture)
                         };
 
                         Environment.ExitCode = (int)ExitCode.InvalidParameters;
                         parametersElement = document.Root.Element("Parameters");
-                        structuralProblemParameters.kappaNormal = Double.Parse(parametersElement.Element("k1").Value.Trim(), CultureInfo.InvariantCulture);
-                        structuralProblemParameters.miTumor = Double.Parse(parametersElement.Element("mu").Value.Trim(), CultureInfo.InvariantCulture);
+                        tumorProblemParameters.kappaNormal = Double.Parse(parametersElement.Element("k1").Value.Trim(), CultureInfo.InvariantCulture);
+                        tumorProblemParameters.miTumor = Double.Parse(parametersElement.Element("mu").Value.Trim(), CultureInfo.InvariantCulture);
 
                         Environment.ExitCode = (int)ExitCode.InvalidOutput;
                         pointsOfInterest = document.Root.Element("Output").Elements("TumorVolume")
                             .Select(x => new Tuple<double, double>
                             (
-                                Double.Parse(x.Attribute("V").Value, CultureInfo.InvariantCulture)
+                                Double.Parse(x.Attribute("X").Value, CultureInfo.InvariantCulture),
+                                Double.Parse(x.Attribute("Y").Value, CultureInfo.InvariantCulture)
                             ))
                             .ToArray();
                         break;
@@ -420,12 +423,14 @@ Korali4MSolve inputfile outputfile_Name
         private static bool SolveTumorGrowthProblem()
         {
 			var equationModel = new MonophasicEquationModel(tumorProblemParameters);
-            var u1X = new double[(int)(totalTime / timeStep)];
-            var u1Y = new double[(int)(totalTime / timeStep)];
-            var u1Z = new double[(int)(totalTime / timeStep)];
+            var u1X = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
+            var u1Y = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
+            var u1Z = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
 
-            var staggeredAnalyzer = new StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
-            for (currentTimeStep = 0; currentTimeStep < totalTime / timeStep; currentTimeStep++)
+            Dictionary<double, double[]> Solution = new Dictionary<double, double[]>();
+
+        var staggeredAnalyzer = new StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
+            for (int currentTimeStep = 0; currentTimeStep < tumorProblemParameters.totalTime / tumorProblemParameters.timeStep; currentTimeStep++)
             {
                 equationModel.CurrentTimeStep = currentTimeStep;
                 equationModel.CreateModel(equationModel.ParentAnalyzers, equationModel.ParentSolvers);
@@ -439,8 +444,8 @@ Korali4MSolve inputfile outputfile_Name
                 if (Solution.ContainsKey(currentTimeStep))
                 {
                     Solution[currentTimeStep] = allValues;
-                    Console.WriteLine($"Time step: {timeStep}");
-                    Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[timeStep])}");
+                    Console.WriteLine($"Time step: {currentTimeStep}");
+                    Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
                 }
                 else
                 {
@@ -458,8 +463,16 @@ Korali4MSolve inputfile outputfile_Name
                     equationModel.NLAnalyzerStates[j] = equationModel.NLAnalyzers[j].CreateState();
                 }
 
+
                 Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
             }
+
+            var outputValues = new Dictionary<Tuple<double, double>, double>();
+            foreach (var timestep in Solution.Keys)
+            {
+                outputValues.Add(new Tuple<double, double>(timestep, 0), Solution[timestep][0]);
+            }
+
 
             return WriteOutputToXml(outputValues, "Volume");
         }
