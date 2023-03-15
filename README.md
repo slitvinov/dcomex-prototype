@@ -4,7 +4,11 @@
 To run Msolve and
 [korali](https://www.cse-lab.ethz.ch/korali)
 integration example use the
-[docker image](ci/Dockerfile),
+[docker image](Dockerfile),
+```shell
+docker build github.com/DComEX/dcomex-prototype --tag dcomex
+docker run -it dcomex bash
+```
 inside the container run
 ```shell
 cd /src/tests/units
@@ -12,6 +16,11 @@ cd /src/tests/units
 cd /src/tests/validation/inference_heat/
 OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
 ```
+or
+```shell
+python3 src/examples/bio_korali.py
+```
+
 ## Directory structure
 
 * [CI](ci): definition of containerised build, test and deployment
