@@ -1,6 +1,5 @@
 from xml.dom.minidom import parse
 import graph
-import matplotlib.pylab as plt
 import mpi4py.MPI
 import os
 import pickle
@@ -29,13 +28,13 @@ def fun(args):
 ''' % (k1, mu))
         rc = subprocess.call(["msolve_bio"])
         if rc != 0:
-                raise Exception("bio.py: msolve_bio failed for parameters %s" %
+                raise Exception("bio_mpi.py: msolve_bio failed for parameters %s" %
                                 str(args))
         document = parse("result.xml")
         Vtag = document.getElementsByTagName("Volume")
         if not Vtag:
                 raise Exception(
-                    "bio.py: result.py does not have Volume for parameters %s" %
+                    "bio_mpi.py: result.xml does not have Volume for parameters %s" %
                     str(args))
         V = float(Vtag[0].childNodes[0].nodeValue)
         return -(V - 1.0)**2
@@ -56,6 +55,4 @@ if rank == 0:
                 path = "%05d.out/samples.pkl" % i
                 with open(path, 'rb') as file:
                         samples.extend(pickle.load(file))
-        plt.axis("equal")
-        plt.plot(*zip(*samples), 'o', alpha=0.1)
-        plt.savefig("bio_mpi.png")
+        print(statistics.fmean(mu + 2 * k1 for k1, mu in itertools.chain(*samples)))

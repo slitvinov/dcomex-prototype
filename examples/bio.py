@@ -4,7 +4,7 @@ import subprocess
 import multiprocessing
 import random
 import itertools
-import matplotlib.pylab as plt
+import statistics
 from xml.dom.minidom import parse
 
 
@@ -36,7 +36,7 @@ def fun(args):
 	Vtag = document.getElementsByTagName("Volume")
 	if not Vtag:
 		raise Exception(
-		    "bio.py: result.py does not have Volume for parameters %s" %
+		    "bio.py: result.xml does not have Volume for parameters %s" %
 		    str(args))
 	V = float(Vtag[0].childNodes[0].nodeValue)
 	return -(V - 1.0)**2
@@ -54,7 +54,4 @@ def worker(i):
 np = multiprocessing.cpu_count()
 pool = multiprocessing.Pool(np)
 samples = pool.map(worker, range(np))
-samples = itertools.chain(*samples)
-plt.axis("equal")
-plt.plot(*zip(*samples), 'o', alpha=0.1)
-plt.savefig("bio.png")
+print(statistics.fmean(mu + 2 * k1 for k1, mu in itertools.chain(*samples)))
