@@ -7,15 +7,15 @@ import tensorflow_probability as tfp
 
 
 def lprob(x):
-	return target.log_prob(x)
+    return target.log_prob(x)
 
 
 def fun(x):
-	return -1 / 2 * x[0]**2
+    return -1 / 2 * x[0]**2
 
 
 def dfun(x):
-	return [-x[0]]
+    return [-x[0]]
 
 
 tfd = tfp.distributions

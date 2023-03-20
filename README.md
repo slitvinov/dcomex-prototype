@@ -18,7 +18,7 @@ OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
 ```
 or
 ```shell
-python3 src/examples/bio_korali.py
+python3 examples/bio.py
 ```
 
 ## Directory structure

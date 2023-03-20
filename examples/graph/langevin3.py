@@ -10,7 +10,7 @@ from tensorflow_probability.python.mcmc import langevin
 
 
 def target_log_prob(z):
-	return target.log_prob(z)
+    return target.log_prob(z)
 
 
 dtype = np.float32

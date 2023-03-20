@@ -38,12 +38,12 @@ integral = [
 
 
 def prior(psi):
-	return scipy.stats.gamma.pdf(psi[0], 4, scale=2) * scipy.stats.gamma.pdf(
-	    psi[1], 4, scale=2)
+    return scipy.stats.gamma.pdf(psi[0], 4, scale=2) * scipy.stats.gamma.pdf(
+        psi[1], 4, scale=2)
 
 
 def likelihood(psi):
-	return integral[0](psi) * integral[1](psi)
+    return integral[0](psi) * integral[1](psi)
 
 
 samples = graph.metropolis(lambda psi: likelihood(psi) * prior(psi),
@@ -51,7 +51,7 @@ samples = graph.metropolis(lambda psi: likelihood(psi) * prior(psi),
                            init=[0.1, 0.1],
                            scale=[1.5, 1.5])
 with open("coins.samples.pkl", "wb") as f:
-	pickle.dump(list(samples), f)
+    pickle.dump(list(samples), f)
 '''
 https://allendowney.github.io/BayesianInferencePyMC/04_hierarchical.html#going-hierarchical
 '''

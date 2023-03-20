@@ -36,17 +36,17 @@ integral = [
 
 
 def likelihood(psi):
-	return math.prod(fun(psi[0]) for fun in integral)
+    return math.prod(fun(psi[0]) for fun in integral)
 
 
 def prior(psi):
-	return 1 if -4 <= psi[0] <= 4 else 0
+    return 1 if -4 <= psi[0] <= 4 else 0
 
 
 def fpost(psi):
-	return 0.4225878520215124 * math.exp(-0.5150415081492156 * psi**2 +
-	                                     2.100150038994303 * psi -
-	                                     2.160126048590465)
+    return 0.4225878520215124 * math.exp(-0.5150415081492156 * psi**2 +
+                                         2.100150038994303 * psi -
+                                         2.160126048590465)
 
 
 samples = graph.metropolis(lambda psi: likelihood(psi) * prior(psi),

@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.join('..', '..', '..'))
 
 from integration.bridge import run_msolve
 
+
 def load_data(filename: str):
     df = pd.read_csv(filename)
     x = df["x"].to_numpy()
@@ -22,8 +23,14 @@ def load_data(filename: str):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--num-cores", type=int, default=1, help="number of cores used by korali.")
-    parser.add_argument("--num-samples", type=int, default=1000, help="number of TMCMC samples per generation.")
+    parser.add_argument("--num-cores",
+                        type=int,
+                        default=1,
+                        help="number of cores used by korali.")
+    parser.add_argument("--num-samples",
+                        type=int,
+                        default=1000,
+                        help="number of TMCMC samples per generation.")
     args = parser.parse_args()
     num_cores = args.num_cores
 
@@ -32,7 +39,7 @@ if __name__ == '__main__':
     def model(ks):
         theta1, theta2, sigma = ks["Parameters"]
         generation = int(ks["Current Generation"])
-        sample_id  = int(ks["Sample Id"])
+        sample_id = int(ks["Sample Id"])
 
         parameters = [theta1, theta2]
 
@@ -90,8 +97,8 @@ if __name__ == '__main__':
     # check the results
     samples = np.array(e["Results"]["Posterior Sample Database"])
 
-    mean_theta1 = np.mean(samples[:,0])
-    mean_theta2 = np.mean(samples[:,1])
+    mean_theta1 = np.mean(samples[:, 0])
+    mean_theta2 = np.mean(samples[:, 1])
 
     ref_theta1 = 0.2
     ref_theta2 = 0.7

@@ -4,7 +4,7 @@ import scipy.integrate
 import matplotlib.pylab as plt
 import statistics
 with open("coins.samples.pkl", "rb") as f:
-	samples = pickle.load(f)
+    samples = pickle.load(f)
 print(statistics.fmean(e[0] for e in samples))
 print(statistics.fmean(e[1] for e in samples))
 plt.ylim((0, 0.15))

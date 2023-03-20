@@ -7,31 +7,31 @@ import scipy.linalg
 
 
 def frandom(x):
-	return random.uniform(0, 1)
+    return random.uniform(0, 1)
 
 
 def sphere(x):
-	return math.fsum(e**2 for e in x)
+    return math.fsum(e**2 for e in x)
 
 
 def flower(x):
-	a, b, c = 1, 1, 4
-	return a * math.sqrt(x[0]**2 + x[1]**2) + b * math.sin(
-	    c * math.atan2(x[1], x[0]))
+    a, b, c = 1, 1, 4
+    return a * math.sqrt(x[0]**2 + x[1]**2) + b * math.sin(
+        c * math.atan2(x[1], x[0]))
 
 
 def elli(x):
-	n = len(x)
-	return math.fsum(1e6**(i / (n - 1)) * x[i]**2 for i in range(n))
+    n = len(x)
+    return math.fsum(1e6**(i / (n - 1)) * x[i]**2 for i in range(n))
 
 
 def rosen(x):
-	alpha = 100
-	return sum(alpha * (x[:-1]**2 - x[1:])**2 + (1 - x[:-1])**2)
+    alpha = 100
+    return sum(alpha * (x[:-1]**2 - x[1:])**2 + (1 - x[:-1])**2)
 
 
 def cigar(x):
-	return x[0]**2 + 1e6 * math.fsum(e**2 for e in x[1:])
+    return x[0]**2 + 1e6 * math.fsum(e**2 for e in x[1:])
 
 
 random.seed(1234)
@@ -53,7 +53,7 @@ plt.figure()
 plt.xlabel("number of function evaluations")
 plt.ylabel("object variables")
 for x in zip(*xmin):
-	plt.plot(nfev, x)
+    plt.plot(nfev, x)
 
 plt.figure()
 plt.xlabel("number of function evaluations")
@@ -63,9 +63,9 @@ plt.plot(nfev, sigma)
 
 ratio, scale = [], []
 for c in C:
-	w = [math.sqrt(e) for e in scipy.linalg.eigvalsh(c)]
-	scale.append(w)
-	ratio.append(w[-1] / w[0])
+    w = [math.sqrt(e) for e in scipy.linalg.eigvalsh(c)]
+    scale.append(w)
+    ratio.append(w[-1] / w[0])
 
 plt.figure()
 plt.xlabel("number of function evaluations")
@@ -78,5 +78,5 @@ plt.xlabel("number of function evaluations")
 plt.ylabel("scales")
 plt.yscale("log")
 for s in zip(*scale):
-	plt.plot(nfev, s)
+    plt.plot(nfev, s)
 plt.show()
