@@ -1,12 +1,14 @@
 ﻿using ISAAR.MSolve.Analyzers;
 using ISAAR.MSolve.Discretization;
 using ISAAR.MSolve.Discretization.FreedomDegrees;
+using ISAAR.MSolve.Discretization.Interfaces;
 using ISAAR.MSolve.Discretization.Mesh;
 using ISAAR.MSolve.FEM.Elements;
 using ISAAR.MSolve.FEM.Entities;
 using ISAAR.MSolve.FEM.Interfaces;
 using ISAAR.MSolve.LinearAlgebra;
 using ISAAR.MSolve.LinearAlgebra.Matrices;
+using ISAAR.MSolve.Logging;
 using ISAAR.MSolve.Materials;
 using ISAAR.MSolve.Problems;
 using ISAAR.MSolve.Solvers.Direct;
@@ -34,6 +36,7 @@ namespace ISAAR.MSolve.MSolve4Korali
         InvalidParameters = -8,
         InvalidOutput = -9,
         ErrorWritingOutput = -10,
+        AnalysisError = -11,
         UnknownError = -99
     }
 
@@ -42,6 +45,7 @@ namespace ISAAR.MSolve.MSolve4Korali
         Unknown = -1,
         Thermal = 0,
         Cantilever,
+        TumorGrowth,
     }
 
     class Program
@@ -63,6 +67,7 @@ Korali4MSolve inputfile outputfile_Name
         private static MeshParameters meshParameters;
         private static ThermalProblemParameters thermalProblemParameters;
         private static StructuralProblemParameters structuralProblemParameters;
+        private static TumorProblemParameters tumorProblemParameters;
         private static Tuple<double, double>[] pointsOfInterest;
         private static double[] problemParameters = new double[0];
 
@@ -118,13 +123,6 @@ Korali4MSolve inputfile outputfile_Name
 
                 Environment.ExitCode = (int)ExitCode.InvalidMesh;
                 var meshElement = document.Root.Element("Mesh");
-                meshParameters = new MeshParameters()
-                {
-                    ElementsX = Int32.Parse(meshElement.Element("ElementsX").Value.Trim(), CultureInfo.InvariantCulture),
-                    ElementsY = Int32.Parse(meshElement.Element("ElementsY").Value.Trim(), CultureInfo.InvariantCulture),
-                    LengthX = Double.Parse(meshElement.Element("LengthX").Value.Trim(), CultureInfo.InvariantCulture),
-                    LengthY = Double.Parse(meshElement.Element("LengthY").Value.Trim(), CultureInfo.InvariantCulture),
-                };
 
                 Environment.ExitCode = (int)ExitCode.InvalidPhysics;
                 var physicsElement = document.Root.Element("Physics");
@@ -134,6 +132,13 @@ Korali4MSolve inputfile outputfile_Name
                 switch (problemTypeAsString.ToUpper())
                 {
                     case "THERMAL":
+                        meshParameters = new MeshParameters()
+                        {
+                            ElementsX = Int32.Parse(meshElement.Element("ElementsX").Value.Trim(), CultureInfo.InvariantCulture),
+                            ElementsY = Int32.Parse(meshElement.Element("ElementsY").Value.Trim(), CultureInfo.InvariantCulture),
+                            LengthX = Double.Parse(meshElement.Element("LengthX").Value.Trim(), CultureInfo.InvariantCulture),
+                            LengthY = Double.Parse(meshElement.Element("LengthY").Value.Trim(), CultureInfo.InvariantCulture),
+                        };
                         problemType = ProblemType.Thermal;
                         thermalProblemParameters = new ThermalProblemParameters()
                         {
@@ -161,6 +166,13 @@ Korali4MSolve inputfile outputfile_Name
                             .ToArray();
                         break;
                     case "CANTILEVER":
+                        meshParameters = new MeshParameters()
+                        {
+                            ElementsX = Int32.Parse(meshElement.Element("ElementsX").Value.Trim(), CultureInfo.InvariantCulture),
+                            ElementsY = Int32.Parse(meshElement.Element("ElementsY").Value.Trim(), CultureInfo.InvariantCulture),
+                            LengthX = Double.Parse(meshElement.Element("LengthX").Value.Trim(), CultureInfo.InvariantCulture),
+                            LengthY = Double.Parse(meshElement.Element("LengthY").Value.Trim(), CultureInfo.InvariantCulture),
+                        };
                         problemType = ProblemType.Cantilever;
                         structuralProblemParameters = new StructuralProblemParameters()
                         {
@@ -191,16 +203,29 @@ Korali4MSolve inputfile outputfile_Name
                             ))
                             .ToArray();
                         break;
+                    case "TUMORGROWTH":
+                        problemType = ProblemType.TumorGrowth;
+                        tumorProblemParameters = new TumorProblemParameters()
+                        {
+                            fileName= meshElement.Element("File").Value.Trim(),
+                            kappaNormal= 0,
+                            miTumor= 0,
+                            timeStep= Double.Parse(physicsElement.Element("Timestep").Value.Trim(), CultureInfo.InvariantCulture),
+                            totalTime= Double.Parse(physicsElement.Element("Time").Value.Trim(), CultureInfo.InvariantCulture)
+                        };
+
+                        Environment.ExitCode = (int)ExitCode.InvalidParameters;
+                        parametersElement = document.Root.Element("Parameters");
+                        tumorProblemParameters.kappaNormal = Double.Parse(parametersElement.Element("k1").Value.Trim(), CultureInfo.InvariantCulture);
+                        tumorProblemParameters.miTumor = Double.Parse(parametersElement.Element("mu").Value.Trim(), CultureInfo.InvariantCulture);
+
+                        Environment.ExitCode = (int)ExitCode.InvalidOutput;
+                        break;
                     default:
                         Console.WriteLine($"Problem type '{problemTypeAsString}' is not recognized.");
                         return false;
                 }
 
-                //Environment.ExitCode = (int)ExitCode.InvalidParameters;
-                //problemParameters = document.Root.Element("Parameters").Value.Trim().Split('\n')
-                //    .Where(x => String.IsNullOrWhiteSpace(x.Trim('\t').Trim('\r')) == false)
-                //    .Select(x => Double.Parse(x.Trim('\t').Trim('\r').Trim(), CultureInfo.InvariantCulture))
-                //    .ToArray();
                 Console.WriteLine("Success initializing problem");
                 return true;
             }
@@ -299,6 +324,46 @@ Korali4MSolve inputfile outputfile_Name
 
             return true;
         }
+        private static bool WriteOutputToXml(double outputValue, double timesteps, bool runSuccess, string physicalQuantity)
+        {
+            Console.WriteLine("Writing output to xml...");
+            Environment.ExitCode = (int)ExitCode.ErrorWritingOutput;
+            var settings = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "\t",
+                NewLineChars = "\r\n",
+                NewLineHandling = NewLineHandling.Replace
+            };
+
+            try
+            {
+                using (var xmlWriter = XmlWriter.Create(outputFile, settings))
+                {
+                    xmlWriter.WriteStartDocument();
+
+                    xmlWriter.WriteStartElement("MSolve4Korali_output");
+                    xmlWriter.WriteAttributeString("version", "1.0");
+
+                    xmlWriter.WriteElementString(physicalQuantity, outputValue.ToString());
+                    xmlWriter.WriteElementString("Timeteps", timesteps.ToString());
+                    xmlWriter.WriteElementString("SolutionMsg", runSuccess ? "Success" : "Fail");
+
+                    xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndDocument();
+
+                    xmlWriter.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"XML writing of {outputFile} failed.\n\r{Enum.GetName(typeof(ExitCode), Environment.ExitCode)}\n\r{ex.Message}");
+                return false;
+            }
+            Console.WriteLine("Success writing output to xml");
+
+            return true;
+        }
 
         private static bool SolveThermalProblem()
         {
@@ -347,41 +412,16 @@ Korali4MSolve inputfile outputfile_Name
         }
 
         private static bool SolveCantileverProblem()
-        {            
+        {
             Console.WriteLine("Solving problem...");
-         
+
             var model = new Model();
             model.SubdomainsDictionary.Add(0, new Subdomain(0));
 
             var elementFactory = new ContinuumElement2DFactory(structuralProblemParameters.CommonThickness,
-                new ElasticMaterial2D(StressState2D.PlaneStress) { YoungModulus = structuralProblemParameters.YoungModulus, PoissonRatio = structuralProblemParameters.PoissonRatio }, 
+                new ElasticMaterial2D(StressState2D.PlaneStress) { YoungModulus = structuralProblemParameters.YoungModulus, PoissonRatio = structuralProblemParameters.PoissonRatio },
                 new DynamicMaterial(structuralProblemParameters.Density, structuralProblemParameters.RayleighMassCoefficient, structuralProblemParameters.RayleighStiffnessCoefficient));
             BuildRectangularMesh(model, elementFactory.CreateElement);
-            //var constrainedNodes = model.Nodes.Where(x => x.X1 == 0 || x.X1 == meshParameters.LengthX || x.X2 == 0 || x.X2 == meshParameters.LengthY);
-            //foreach (var node in constrainedNodes)
-            //{
-            //    node.Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationX, Amount = structuralProblemParameters.DisplacementXAtBoundaries });
-            //    node.Constraints.Add(new Constraint() { DOF = StructuralDof.TranslationY, Amount = structuralProblemParameters.DisplacementYAtBoundaries });
-            //}
-
-            //var dx = meshParameters.LengthX / meshParameters.ElementsX;
-            //var dy = meshParameters.LengthY / meshParameters.ElementsY;
-            //foreach (var node in model.Nodes.Except(constrainedNodes))
-            //{
-            //    model.Loads.Add(new Load()
-            //    {
-            //        Amount = structuralProblemParameters.LoadMagnitudeX * Math.Exp(-(Math.Pow(node.X1 - structuralProblemParameters.Theta1, 2) + Math.Pow(node.X2 - structuralProblemParameters.Theta2, 2)) / structuralProblemParameters.LoadSpread) * dx * dy,
-            //        Node = node,
-            //        DOF = StructuralDof.TranslationX
-            //    });
-
-            //    model.Loads.Add(new Load()
-            //    {
-            //        Amount = structuralProblemParameters.LoadMagnitudeY * Math.Exp(-(Math.Pow(node.X1 - structuralProblemParameters.Theta1, 2) + Math.Pow(node.X2 - structuralProblemParameters.Theta2, 2)) / structuralProblemParameters.LoadSpread) * dx * dy,
-            //        Node = node,
-            //        DOF = StructuralDof.TranslationY
-            //    });
-            //}
 
             SkylineSolver solver = new SkylineSolver.Builder().BuildSolver(model);
             var provider = new ProblemStructural(model, solver);
@@ -414,6 +454,66 @@ Korali4MSolve inputfile outputfile_Name
             return WriteOutputToXml(outputValues, "Displacement X");
         }
 
+        private static bool SolveTumorGrowthProblem()
+        {
+			var equationModel = new MonophasicEquationModel(tumorProblemParameters);
+            var u1X = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
+            var u1Y = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
+            var u1Z = new double[(int)(tumorProblemParameters.totalTime / tumorProblemParameters.timeStep)];
+
+            Dictionary<double, double[]> Solution = new Dictionary<double, double[]>();
+
+            var staggeredAnalyzer = new MGroup.NumericalAnalyzers.Staggered.StepwiseStaggeredAnalyzer(equationModel.ParentAnalyzers, equationModel.ParentSolvers, equationModel.CreateModel, maxStaggeredSteps: 3, tolerance: 1e-5);
+            try
+            {
+                Environment.ExitCode = (int)ExitCode.InvalidParameters;
+                for (int currentTimeStep = 0; currentTimeStep < tumorProblemParameters.totalTime / tumorProblemParameters.timeStep; currentTimeStep++)
+                {
+                    equationModel.CurrentTimeStep = currentTimeStep;
+                    equationModel.CreateModel(equationModel.ParentAnalyzers, equationModel.ParentSolvers);
+                    staggeredAnalyzer.SolveCurrentStep();
+
+                    var allValues = ((MGroup.NumericalAnalyzers.Logging.DOFSLog)equationModel.ParentAnalyzers[0].ChildAnalyzer.Logs[0]).DOFValues.Select(x => x.val).ToArray();
+
+                    u1X[currentTimeStep] = allValues[0];
+                    u1Y[currentTimeStep] = allValues[1];
+                    u1Z[currentTimeStep] = allValues[2];
+
+                    if (Solution.ContainsKey(currentTimeStep))
+                    {
+                        Solution[currentTimeStep] = allValues;
+                        Console.WriteLine($"Time step: {currentTimeStep}");
+                        Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
+                    }
+                    else
+                    {
+                        Solution.Add(currentTimeStep, allValues);
+                    }
+
+                    for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                    {
+                        (equationModel.ParentAnalyzers[j] as MGroup.NumericalAnalyzers.Dynamic.PseudoTransientAnalyzer).AdvanceStep();
+                    }
+
+                    for (int j = 0; j < equationModel.ParentAnalyzers.Length; j++)
+                    {
+                        equationModel.AnalyzerStates[j] = equationModel.ParentAnalyzers[j].CreateState();
+                        equationModel.NLAnalyzerStates[j] = equationModel.NLAnalyzers[j].CreateState();
+                    }
+
+
+                    Console.WriteLine($"Displacement vector: {string.Join(", ", Solution[currentTimeStep])}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Analysis failed on step {equationModel.CurrentTimeStep}.\n\r{Enum.GetName(typeof(ExitCode), Environment.ExitCode)}\n\r{ex.Message}");
+                return WriteOutputToXml(Solution[equationModel.CurrentTimeStep-1][0], equationModel.CurrentTimeStep-1, false, "Volume");
+            }
+
+            return WriteOutputToXml(Solution[equationModel.CurrentTimeStep][0], equationModel.CurrentTimeStep, true, "Volume");
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("Starting MSolve4Korali");
@@ -444,6 +544,13 @@ Korali4MSolve inputfile outputfile_Name
                         return;
                     }
                     break;
+                case ProblemType.TumorGrowth:
+                    if (SolveTumorGrowthProblem() == false)
+                    {
+                        Console.WriteLine("Could not solve Thermal problem. Exiting.");
+                        return;
+                    }
+                    break;
                 default:
                     Console.WriteLine("Could not resolve problem type. Exiting.");
                     return;
@@ -454,3 +561,4 @@ Korali4MSolve inputfile outputfile_Name
         }
     }
 }
+

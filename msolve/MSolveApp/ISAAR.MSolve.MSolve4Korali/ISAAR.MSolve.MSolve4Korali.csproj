@@ -39,5 +39,29 @@
     <Reference Include="ISAAR.MSolve.Solvers">
       <HintPath>bin\Debug\ISAAR.MSolve.Solvers.dll</HintPath>
     </Reference>
+    <Reference Include="MGroup.Constitutive.Structural">
+      <HintPath>bioLibs\MGroup.Constitutive.Structural.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.FEM.Structural">
+      <HintPath>bioLibs\MGroup.FEM.Structural.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.LinearAlgebra">
+      <HintPath>bioLibs\MGroup.LinearAlgebra.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.LinearAlgebra.Distributed">
+      <HintPath>bioLibs\MGroup.LinearAlgebra.Distributed.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.MSolve.Core">
+      <HintPath>bioLibs\MGroup.MSolve.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.NumericalAnalyzers">
+      <HintPath>bioLibs\MGroup.NumericalAnalyzers.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.NumericalAnalyzers.Discretization">
+      <HintPath>bioLibs\MGroup.NumericalAnalyzers.Discretization.dll</HintPath>
+    </Reference>
+    <Reference Include="MGroup.Solvers">
+      <HintPath>bioLibs\MGroup.Solvers.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
