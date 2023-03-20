@@ -4,7 +4,7 @@ import scipy.integrate
 import matplotlib.pylab as plt
 
 with open("samples.pkl", "rb") as f:
-	samples = pickle.load(f)
+    samples = pickle.load(f)
 D = np.loadtxt("three.dat")
 x = D[:, 0]
 y0 = D[:, 1]

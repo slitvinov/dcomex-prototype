@@ -6,11 +6,11 @@ import numpy as np
 
 
 def fun(x):
-	return -1 / 2 * (x[0]**2 + x[1]**2)
+    return -1 / 2 * (x[0]**2 + x[1]**2)
 
 
 def dfun(x):
-	return [-x[0], -x[1]]
+    return [-x[0], -x[1]]
 
 
 random.seed(123456)

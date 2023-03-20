@@ -7,7 +7,7 @@ import pickle
 
 
 def prior(psi):
-	return 1 if 1 < psi[0] < 40 else 0
+    return 1 if 1 < psi[0] < 40 else 0
 
 
 seed = 123456
@@ -31,4 +31,4 @@ samples = graph.metropolis(lambda psi: l0(psi) * prior(psi),
                            init=[50],
                            scale=[20])
 with open("samples.pkl", "wb") as f:
-	pickle.dump(list(samples), f)
+    pickle.dump(list(samples), f)

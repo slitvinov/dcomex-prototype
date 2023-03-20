@@ -19,13 +19,11 @@ sys.path.append(os.path.join(conf_file_abs_path, ".."))
 
 import integration
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'DComEX Framework'
 copyright = '2022, NTUA, ETHZ'
 author = 'NTUA, ETHZ'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,9 +31,7 @@ author = 'NTUA, ETHZ'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
     'sphinx_automodapi.automodapi'
 ]
 
@@ -46,7 +42,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 # -- Options for HTML output -------------------------------------------------
 

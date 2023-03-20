@@ -6,6 +6,7 @@ import subprocess
 import sys
 import xml.dom.minidom
 
+
 def model(ks):
     k1, mu, sigma = ks["Parameters"]
     path = "%05d.out" % int(ks["Sample Id"])
@@ -13,7 +14,7 @@ def model(ks):
     wd = os.getcwd()
     os.chdir(path)
     with open("config.xml", "w") as file:
-            file.write('''<MSolve4Korali version="1.0">
+        file.write('''<MSolve4Korali version="1.0">
     <Mesh>
             <File>MeshCyprusTM.mphtxt</File>
     </Mesh>
@@ -32,18 +33,19 @@ def model(ks):
     ''' % (k1, mu))
     rc = subprocess.call(["msolve_bio"])
     if rc != 0:
-            raise Exception("bio_korali: msolve_bio failed for parameters %s" %
-                            str(ks))
+        raise Exception("bio_korali: msolve_bio failed for parameters %s" %
+                        str(ks))
     document = xml.dom.minidom.parse("result.xml")
     os.chdir(wd)
     Vtag = document.getElementsByTagName("Volume")
     if not Vtag:
-            raise Exception(
-                "bio_korali: result.xml does not have Volume for parameters %s" %
-                str(args))
+        raise Exception(
+            "bio_korali: result.xml does not have Volume for parameters %s" %
+            str(args))
     V = float(Vtag[0].childNodes[0].nodeValue)
     ks["Reference Evaluations"] = [V]
     ks["Standard Deviation"] = [sigma]
+
 
 num_cores = multiprocessing.cpu_count()
 e = korali.Experiment()

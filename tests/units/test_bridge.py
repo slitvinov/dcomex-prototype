@@ -6,8 +6,8 @@ import unittest
 
 sys.path.insert(0, os.path.join('..', '..'))
 
-from integration.bridge import (run_msolve_mock,
-                                run_msolve)
+from integration.bridge import (run_msolve_mock, run_msolve)
+
 
 def read_temperature(korali_file: str):
     import json
@@ -34,7 +34,7 @@ class TestBridge(unittest.TestCase):
 
         def model(ksample):
             generation = int(ksample["Current Generation"])
-            sample_id  = int(ksample["Sample Id"])
+            sample_id = int(ksample["Sample Id"])
             theta1, theta2 = ksample["Parameters"]
             parameters = [theta1, theta2]
 
@@ -45,7 +45,6 @@ class TestBridge(unittest.TestCase):
                                       parameters=parameters)
 
             ksample["Evaluations"] = T
-
 
         e = korali.Experiment()
 
@@ -65,12 +64,11 @@ class TestBridge(unittest.TestCase):
         k = korali.Engine()
         k.run(e)
 
-        Tref = theta1[:,np.newaxis] * xcoords[np.newaxis,:] + theta2[:,np.newaxis] * ycoords[np.newaxis,:]
+        Tref = theta1[:, np.newaxis] * xcoords[
+            np.newaxis, :] + theta2[:, np.newaxis] * ycoords[np.newaxis, :]
         T = read_temperature(os.path.join("_korali_result", "latest"))
 
         np.testing.assert_array_equal(T, Tref)
-
-
 
     def test_korali_executes_msolve(self):
 
@@ -82,7 +80,7 @@ class TestBridge(unittest.TestCase):
 
         def model(ksample):
             generation = int(ksample["Current Generation"])
-            sample_id  = int(ksample["Sample Id"])
+            sample_id = int(ksample["Sample Id"])
             theta1, theta2 = ksample["Parameters"]
             parameters = [theta1, theta2]
 
@@ -93,7 +91,6 @@ class TestBridge(unittest.TestCase):
                                  parameters=parameters)
 
             ksample["Evaluations"] = T
-
 
         e = korali.Experiment()
 

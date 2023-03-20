@@ -18,11 +18,8 @@ RUN apt-get -qq install --no-install-recommends python3-dev
 RUN apt-get -qq install --no-install-recommends python3-matplotlib
 RUN apt-get -qq install --no-install-recommends python3-mpi4py
 RUN apt-get -qq install --no-install-recommends python3-numpy
-RUN apt-get -qq install --no-install-recommends python3-pandas
-RUN apt-get -qq install --no-install-recommends python3-pip
 RUN apt-get -qq install --no-install-recommends python3-pybind11
 RUN apt-get -qq install --no-install-recommends python3-scipy
-RUN apt-get -qq install --no-install-recommends python3-xlrd
 RUN apt-get -qq install --no-install-recommends wget
 RUN wget --no-check-certificate -q http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz -O /tmp/mpich-${MPICH_VERSION}.tar.gz
 RUN tar -zxf /tmp/mpich-${MPICH_VERSION}.tar.gz -C /tmp/
@@ -41,7 +38,13 @@ RUN meson setup build --prefix=/usr/local --buildtype=release -Dmpi=true
 RUN ninja -C build
 RUN meson install -C build
 WORKDIR /src/msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali
-RUN dotnet build --nologo
+RUN dotnet build --nologo --configuration Release
+RUN mkdir -p $HOME/.local/bin/
+RUN mkdir -p $HOME/.local/share/
+RUN cp bin/Release/net6.0/ISAAR.MSolve.MSolve4Korali $HOME/.local/bin/
+RUN cp bin/Release/net6.0/ISAAR.MSolve.MSolve4Korali.runtimeconfig.json $HOME/.local/bin/
+RUN cp bin/Release/net6.0/*.dll $HOME/.local/bin/
+RUN cp /src/msolve/ioDir/MeshCyprusTM.mphtxt $HOME/.local/share/
 WORKDIR /src
 RUN make
 RUN echo 'PATH=$HOME/.local/bin:$PATH' > $HOME/.bashrc

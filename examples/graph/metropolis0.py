@@ -5,7 +5,7 @@ import statistics
 
 
 def fun(x):
-	return scipy.stats.multivariate_normal.logpdf(x, mean, cov)
+    return scipy.stats.multivariate_normal.logpdf(x, mean, cov)
 
 
 mean = (1, 2, 7)

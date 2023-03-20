@@ -4,9 +4,8 @@ import subprocess
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 
-def write_config_file(xcoords, ycoords,
-                      parameters: list,
-                      filename: str):
+
+def write_config_file(xcoords, ycoords, parameters: list, filename: str):
     """
     Write an xml configuration file readable by MSolve.
     The configuration describes the problem of a 2D plate
@@ -38,7 +37,8 @@ def write_config_file(xcoords, ycoords,
 		<HeatSourceMagnitude>10</HeatSourceMagnitude>
 		<HeatSourceSpread>0.01</HeatSourceSpread>
 	</Physics>
-	<Output>""", file=f)
+	<Output>""",
+              file=f)
 
         for x, y in zip(xcoords, ycoords):
             print(f'        <Temperature X="{x}" Y="{y}"/>', file=f)
@@ -48,7 +48,8 @@ def write_config_file(xcoords, ycoords,
 		<Theta1>{theta1}</Theta1>
 		<Theta2>{theta2}</Theta2>
 	</Parameters>
-</MSolve4Korali>""", file=f)
+</MSolve4Korali>""",
+              file=f)
 
 
 def parse_msolve_results(filename: str):
@@ -63,10 +64,7 @@ def parse_msolve_results(filename: str):
     return x, y, T
 
 
-
-def run_msolve_mock(xcoords, ycoords,
-                    generation: int,
-                    sample_id: int,
+def run_msolve_mock(xcoords, ycoords, generation: int, sample_id: int,
                     parameters: list):
     """
     Run a mock version of msolve.
@@ -74,14 +72,13 @@ def run_msolve_mock(xcoords, ycoords,
     """
 
     basedir = os.getcwd()
-    run_dir = os.path.join(basedir,
-                           f"gen_{str(generation).zfill(6)}",
+    run_dir = os.path.join(basedir, f"gen_{str(generation).zfill(6)}",
                            f"sample_{str(sample_id).zfill(6)}")
 
     os.makedirs(run_dir, exist_ok=True)
     os.chdir(run_dir)
 
-    input_fname  = os.path.join(run_dir, "config.xml")
+    input_fname = os.path.join(run_dir, "config.xml")
     output_fname = os.path.join(run_dir, "result.xml")
     stdout_fname = os.path.join(run_dir, "stdout.txt")
     stderr_fname = os.path.join(run_dir, "stderr.txt")
@@ -91,9 +88,11 @@ def run_msolve_mock(xcoords, ycoords,
     with open(stdout_fname, "w") as stdout_file, \
          open(stderr_fname, "w") as stderr_file:
 
-        subprocess.call(['python3', os.path.join(script_dir, 'msolve_mock.py'),
-                         '--input-file', input_fname,
-                         '--output-file', output_fname],
+        subprocess.call([
+            'python3',
+            os.path.join(script_dir, 'msolve_mock.py'), '--input-file',
+            input_fname, '--output-file', output_fname
+        ],
                         stdout=stdout_file,
                         stderr=stderr_file)
 
@@ -103,10 +102,7 @@ def run_msolve_mock(xcoords, ycoords,
     return x, y, T
 
 
-
-def run_msolve(xcoords, ycoords,
-               generation: int,
-               sample_id: int,
+def run_msolve(xcoords, ycoords, generation: int, sample_id: int,
                parameters: list):
     """
     Run an instance of Msolve for given parameters.
@@ -126,14 +122,13 @@ def run_msolve(xcoords, ycoords,
     """
 
     basedir = os.getcwd()
-    run_dir = os.path.join(basedir,
-                           f"gen_{str(generation).zfill(6)}",
+    run_dir = os.path.join(basedir, f"gen_{str(generation).zfill(6)}",
                            f"sample_{str(sample_id).zfill(6)}")
 
     os.makedirs(run_dir, exist_ok=True)
     os.chdir(run_dir)
 
-    input_fname  = os.path.join(run_dir, "config.xml")
+    input_fname = os.path.join(run_dir, "config.xml")
     output_fname = os.path.join(run_dir, "result.xml")
     stdout_fname = os.path.join(run_dir, "stdout.txt")
     stderr_fname = os.path.join(run_dir, "stderr.txt")
@@ -141,8 +136,8 @@ def run_msolve(xcoords, ycoords,
     write_config_file(xcoords, ycoords, parameters, input_fname)
 
     msolve_path = os.path.join(script_dir, '..', 'msolve', 'MSolveApp',
-                               'ISAAR.MSolve.MSolve4Korali', 'bin', 'Debug', 'net6.0',
-                               'ISAAR.MSolve.MSolve4Korali')
+                               'ISAAR.MSolve.MSolve4Korali', 'bin', 'Debug',
+                               'net6.0', 'ISAAR.MSolve.MSolve4Korali')
 
     with open(stdout_fname, "w") as stdout_file, \
          open(stderr_fname, "w") as stderr_file:
