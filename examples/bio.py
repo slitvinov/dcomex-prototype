@@ -8,6 +8,7 @@ import random
 import subprocess
 import sys
 
+
 def fun(args):
     k1, mu = args
     mphtxt = os.path.join(os.environ["HOME"], ".local", "share",
@@ -71,10 +72,14 @@ def worker(i):
                          init=[0.5, 0.3],
                          scale=[0.01, 0.01],
                          log=True))
+
+
 draws = int(sys.argv[1])
-np = multiprocessing.cpu_count()
-pool = multiprocessing.Pool(np)
-samples = pool.map(worker, range(np))
+np = multiprocessing.cpu_count() if len(sys.argv) < 2 else int(sys.argv[2])
+if np == 1:
+    samples = [worker(0)]
+else:
+    pool = multiprocessing.Pool(np)
+    samples = pool.map(worker, range(np))
 plt.plot(itertools.chain(*samples), 'o', alpha=0.1)
 plt.savefig("bio.png")
-
