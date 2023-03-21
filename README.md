@@ -31,7 +31,7 @@ Usage: bio [-v] [-h] k1 mu time
 
 ## Results
 <p align="center"><img src="examples/bio/bio.svg" alt="MSolve results"/></p>
-
+<p align="center"><img src="examples/bio/mesh.png" alt="MSolve results"/></p>
 
 ## Directory structure
 
