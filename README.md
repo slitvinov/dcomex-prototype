@@ -5,21 +5,33 @@ To run Msolve and
 [korali](https://www.cse-lab.ethz.ch/korali)
 integration example use the
 [docker image](Dockerfile),
-```shell
-docker build github.com/DComEX/dcomex-prototype --tag dcomex
-docker run -it dcomex bash
+```
+$ docker build github.com/DComEX/dcomex-prototype --tag dcomex
+$ docker run -it dcomex bash
 ```
 inside the container run
-```shell
-cd /src/tests/units
-./run.sh
-cd /src/tests/validation/inference_heat/
-OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
+```
+$ cd /src/tests/units
+$ ./run.sh
+$ cd /src/tests/validation/inference_heat/
+$ OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
 ```
 or
-```shell
-python3 examples/bio.py
 ```
+$ python3 examples/bio.py
+```
+
+To run one msolve simulation
+```
+$ bio 0.1 0.2 1
+7.664370585504502E-11
+$ bio -h
+Usage: bio [-v] [-h] k1 mu time
+```
+
+## Results
+<p align="center"><img src="examples/bio/bio.svg" alt="MSolve results"/></p>
+
 
 ## Directory structure
 

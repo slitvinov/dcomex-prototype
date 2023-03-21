@@ -75,11 +75,11 @@ def worker(i):
 
 
 draws = int(sys.argv[1])
-np = multiprocessing.cpu_count() if len(sys.argv) < 2 else int(sys.argv[2])
+np = multiprocessing.cpu_count() if len(sys.argv) < 3 else int(sys.argv[2])
 if np == 1:
     samples = [worker(0)]
 else:
     pool = multiprocessing.Pool(np)
     samples = pool.map(worker, range(np))
-plt.plot(itertools.chain(*samples), 'o', alpha=0.1)
+plt.plot(list(itertools.chain(*samples)), 'o', alpha=0.1)
 plt.savefig("bio.png")
