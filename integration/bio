@@ -22,7 +22,7 @@ case "$time" in
     *) echo 'bio: time should be an positive integer' >&2; exit 1;;
 esac
 
-if test -f "$mph"
+if ! test -f "$mph"
 then printf "bio: cannot find mesh '%s'\n" "$mph" >&2
      exit 1
 fi
