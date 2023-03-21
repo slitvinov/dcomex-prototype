@@ -48,7 +48,7 @@ cat <<! > $c
 </MSolve4Korali>
 !
 
-if ! command -v ISAAR.MSolve.MSolve4Korali
+if ! command >/dev/null -v ISAAR.MSolve.MSolve4Korali
 then
     echo 'bio: ISAAR.MSolve.MSolve4Korali command is not avialabe' >&2
     exit 1
