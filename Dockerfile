@@ -37,8 +37,6 @@ WORKDIR /src/korali
 RUN meson setup build --prefix=/usr/local --buildtype=release -Dmpi=true
 RUN ninja -C build
 RUN meson install -C build
-WORKDIR /src/msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali
-RUN dotnet build --nologo --configuration Release
 WORKDIR /src
 RUN make
 RUN echo 'PATH=$HOME/.local/bin:$PATH' > $HOME/.bashrc
