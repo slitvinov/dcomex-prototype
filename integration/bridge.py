@@ -135,7 +135,10 @@ def run_msolve(xcoords, ycoords, generation: int, sample_id: int,
 
     write_config_file(xcoords, ycoords, parameters, input_fname)
 
-    msolve_path = os.path.join('ISAAR.MSolve.MSolve4Korali')
+    msolve_path = os.path.join(script_dir, '..', 'msolve', 'MSolveApp',
+                               'ISAAR.MSolve.MSolve4Korali', 'bin', 'Debug',
+                               'net6.0', 'ISAAR.MSolve.MSolve4Korali')
+
     with open(stdout_fname, "w") as stdout_file, \
          open(stderr_fname, "w") as stderr_file:
 
