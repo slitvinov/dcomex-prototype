@@ -11,20 +11,20 @@ integration/bio\
 
 all: bin lib ms
 bin: $B
-	@p=$(HOME)/.local/bin || exit 2 && \
+	@p=/usr/bin || exit 2 && \
 	mkdir -p "$$p" && \
 	for i in $B; do cp -- "$$i" "$$p/$$f" || exit 2; done
 
 lib: $M
-	@p=`"$(PY)" -m site --user-site` || exit 2 && \
+	@p=`"$(PY)" -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 && \
 	mkdir -p "$$p" && \
 	for i in $M; do cp -- "$$i" "$$p/$$f" || exit 2; done
 
 ms:
-	mkdir -p "$HOME/.local/share" && \
-	cp msolve/ioDir/MeshCyprusTM.mphtxt "$HOME/.local/share"
+	mkdir -p /usr/share && \
+	cp msolve/ioDir/MeshCyprusTM.mphtxt /usr/share/
 	(cd msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali && \
-		dotnet publish --nologo --configuration Release --output "$(HOME)/.local/bin")
+		dotnet publish --nologo --configuration Release --output /usr/bin)
 
 clean:
 	(cd msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali &&
