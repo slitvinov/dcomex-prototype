@@ -22,7 +22,6 @@ run_prototype_test:
   stage: test
   image: ${PERSIST_IMAGE_NAME}
   script:
-    - . $HOME/.bashrc
     - cd /src/tests/units/
     - ./run.sh
     - cd /src/tests/validation/inference_heat/
