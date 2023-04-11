@@ -33,6 +33,18 @@ Usage: bio [-v] [-h] k1 mu time
 <p align="center"><img src="examples/bio/bio.svg" alt="MSolve results"/></p>
 <p align="center"><img src="examples/bio/mesh.png" alt="MSolve results"/></p>
 
+## Running manually
+To replicate CI runs manually it is possible to pull the containers by logging in to Piz Daint and execute the commands
+```
+module load sarus
+sarus pull IMAGE_NAME
+srun --pty -C gpu -A GROUP_ID -N1 -n1 sarus run --mpi --tty IMAGE_NAME bash
+```
+This will drop you to a shell on the compute node inside the container. From there you can
+replicate running the commands as in `ci/prototype.yml`.
+It is important to make sure that the container image names match the naming `*/public/*`, i.e.
+they must reside in a folder named public, only then anonymous access is possible.
+
 ## Directory structure
 
 * [CI](ci): definition of containerised build, test and deployment
