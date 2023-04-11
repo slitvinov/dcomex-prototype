@@ -33,7 +33,7 @@ RUN env TZ=Europe/Zurich DEBIAN_FRONTEND=noninteractive \
     python3-matplotlib \
     python3-numpy \
     python3-pybind11 \
-    python3-scipy \
+    python3-scipy
 
 RUN cd /tmp \
   && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
