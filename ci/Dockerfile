@@ -1,5 +1,5 @@
-ARG REGISTRY_PATH=finkandreas
-FROM $REGISTRY_PATH/dcomex-prototype_base:1.0
+ARG BASE_IMAGE
+FROM $BASE_IMAGE
 COPY . /src
 WORKDIR /src/korali
 RUN meson setup build --prefix=/usr/local --buildtype=release -Dmpi=true
