@@ -1,8 +1,9 @@
-import sys
-import statistics
-import random
-import math
+import functools
 import kahan
+import math
+import random
+import statistics
+import sys
 try:
     import scipy.special
 except ImportError:
@@ -13,7 +14,7 @@ except ImportError:
     np = None
 
 
-class Integral(object):
+class Integral:
     """Caches the samples to evalute the integral several times
         """
 
@@ -96,7 +97,7 @@ def metropolis(fun, draws, init, scale, log=False):
         t += 1
         if t == draws:
             break
-        xp = [e + random.gauss(0, s) for e, s in zip(x, scale)]
+        xp = tuple(e + random.gauss(0, s) for e, s in zip(x, scale))
         pp = fun(xp)
         if pp > p or cond(pp, p):
             x, p = xp, pp
@@ -143,7 +144,7 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
 
     s2 = sigma * sigma
     x = init[:]
-    y = [x + s2 / 2 * d for x, d in zip(x, dfun(x))]
+    y = tuple(x + s2 / 2 * d for x, d in zip(x, dfun(x)))
     p = fun(x)
     t = 0
     accept = 0
@@ -153,8 +154,8 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
         t += 1
         if t == draws:
             break
-        xp = [random.gauss(y, sigma) for y in y]
-        yp = [xp + s2 / 2 * d for xp, d in zip(xp, dfun(xp))]
+        xp = tuple(random.gauss(y, sigma) for y in y)
+        yp = tuple(xp + s2 / 2 * d for xp, d in zip(xp, dfun(xp)))
         pp = fun(xp)
         if cond(pp, p, sqdiff(xp, y) / (2 * s2), sqdiff(x, yp) / (2 * s2)):
             x, p, y = xp, pp, yp
@@ -203,7 +204,10 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
     p = 0
     S = 0
     d = len(lo)
-    x = [[random.uniform(l, h) for l, h in zip(lo, hi)] for i in range(draws)]
+    x = [
+        tuple(random.uniform(l, h) for l, h in zip(lo, hi))
+        for i in range(draws)
+    ]
     f = np.array([fun(e) for e in x])
     x2 = [[None] * d for i in range(draws)]
     sigma = [[None] * d for i in range(d)]
@@ -246,7 +250,7 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
         accept = 0
         for i, j in enumerate(ind):
             delta = [random.gauss(0, 1) for k in range(d)]
-            xp = [a + b for a, b in zip(x[j], sqrtC @ delta)]
+            xp = tuple(a + b for a, b in zip(x[j], sqrtC @ delta))
             if inside(xp):
                 fp = fun(xp)
                 if fp > f[j] or p * fp > p * f[j] + math.log(
@@ -331,3 +335,57 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
             Trace.append(
                 (gen * lambd, ys[0], xs[0], sigma, C, ps, pc, Cmu, C1, xmean))
     return Trace if trace else xmean
+
+
+Stack = []
+Graph = set()
+Labels = {}
+
+
+class Trace:
+
+    def __init__(self, fn):
+        self.fn = fn
+
+    def __enter__(self):
+        if Stack:
+            Graph.add((Stack[-1], self.fn))
+        else:
+            Stack.clear()
+            Graph.clear()
+        Stack.append(self.fn)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        Stack.pop()
+
+
+def trace(label=None):
+
+    def wrap(f):
+        Labels[f] = label if label != None else f.__name__ if hasattr(
+            f, '__name__') else str(f)
+
+        @functools.wraps(f)
+        def wrap0(*args, **kwargs):
+            with Trace(f) as T:
+                return f(*args, **kwargs)
+
+        return wrap0
+
+    return wrap
+
+
+def graphviz(buf):
+    Numbers = {}
+    Vertices = set()
+    buf.write("digraph {\n")
+    for v, w in Graph:
+        Vertices.add(v)
+        Vertices.add(w)
+    for i, v in enumerate(Vertices):
+        Numbers[v] = i
+        buf.write('%d [label = "%s"]\n' % (i, Labels[v]))
+    for v, w in Graph:
+        buf.write("%d -> %d\n" % (Numbers[v], Numbers[w]))
+    buf.write("}\n")
