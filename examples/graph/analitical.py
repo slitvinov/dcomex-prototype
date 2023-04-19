@@ -3,7 +3,6 @@ import matplotlib.pylab as plt
 import numpy as np
 import random
 import statistics
-import sys
 import graph
 
 random.seed(123456)

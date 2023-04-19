@@ -1,8 +1,9 @@
-import sys
-import statistics
-import random
-import math
+import functools
 import kahan
+import math
+import random
+import statistics
+import sys
 try:
     import scipy.special
 except ImportError:
@@ -13,7 +14,7 @@ except ImportError:
     np = None
 
 
-class Integral(object):
+class Integral:
     """Caches the samples to evalute the integral several times
         """
 
@@ -203,7 +204,10 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
     p = 0
     S = 0
     d = len(lo)
-    x = [tuple(random.uniform(l, h) for l, h in zip(lo, hi)) for i in range(draws)]
+    x = [
+        tuple(random.uniform(l, h) for l, h in zip(lo, hi))
+        for i in range(draws)
+    ]
     f = np.array([fun(e) for e in x])
     x2 = [[None] * d for i in range(draws)]
     sigma = [[None] * d for i in range(d)]
@@ -331,3 +335,57 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
             Trace.append(
                 (gen * lambd, ys[0], xs[0], sigma, C, ps, pc, Cmu, C1, xmean))
     return Trace if trace else xmean
+
+
+Stack = []
+Graph = set()
+Labels = {}
+
+
+class Trace:
+
+    def __init__(self, fn):
+        self.fn = fn
+
+    def __enter__(self):
+        if Stack:
+            Graph.add((Stack[-1], self.fn))
+        else:
+            Stack.clear()
+            Graph.clear()
+        Stack.append(self.fn)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        Stack.pop()
+
+
+def trace(label=None):
+
+    def wrap(f):
+        Labels[f] = label if label != None else f.__name__ if hasattr(
+            f, '__name__') else str(f)
+
+        @functools.wraps(f)
+        def wrap0(*args, **kwargs):
+            with Trace(f) as T:
+                return f(*args, **kwargs)
+
+        return wrap0
+
+    return wrap
+
+
+def graphviz(buf):
+    Numbers = {}
+    Vertices = set()
+    buf.write("digraph {\n")
+    for v, w in Graph:
+        Vertices.add(v)
+        Vertices.add(w)
+    for i, v in enumerate(Vertices):
+        Numbers[v] = i
+        buf.write('%d [label = "%s"]\n' % (i, Labels[v]))
+    for v, w in Graph:
+        buf.write("%d -> %d\n" % (Numbers[v], Numbers[w]))
+    buf.write("}\n")
