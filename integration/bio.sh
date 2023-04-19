@@ -1,6 +1,6 @@
 #!/bin/sh
 
-: ${mph=/usr/share/MeshCyprusTM.mphtxt}
+: ${mph=%mph%}
 usage () {
     echo 'Usage: bio [-v] [-h] k1 mu time' >&2
     exit 1
