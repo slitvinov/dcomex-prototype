@@ -7,6 +7,7 @@ PREFIX = /usr
 USER = 0
 
 M = \
+follow.py\
 graph.py\
 kahan.py\
 
@@ -37,5 +38,6 @@ ms:
 	chmod a+x $@
 
 clean:
+	rm -f $B
 	cd msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali && \
 		DOTNET_CLI_TELEMETRY_OPTOUT=1 '$(DOTNET)' clean --nologo

@@ -1,9 +1,10 @@
-import functools
 import kahan
 import math
 import random
 import statistics
 import sys
+import follow
+
 try:
     import scipy.special
 except ImportError:
@@ -42,6 +43,9 @@ class Integral:
                 options : dict, optional
                       a dictionary of options for the sampling algorithm"""
         self.theta_given_psi = theta_given_psi
+        if hasattr(self.theta_given_psi, '_f'):
+            follow.Stack.append(self.theta_given_psi._f)
+
         if method == "metropolis":
             self.samples = list(metropolis(data_given_theta, **options))
         elif method == "langevin":
@@ -52,6 +56,9 @@ class Integral:
             self.samples = korali_sample(data_given_theta, **options)
         else:
             raise ValueError("Unknown sampler '%s'" % method)
+
+        if hasattr(self.theta_given_psi, '_f'):
+            follow.Stack.pop()
 
     def __call__(self, psi):
         """Estimate the integral given hyproparameter psi"""
@@ -335,57 +342,3 @@ def cmaes(fun, x0, sigma, g_max, trace=False):
             Trace.append(
                 (gen * lambd, ys[0], xs[0], sigma, C, ps, pc, Cmu, C1, xmean))
     return Trace if trace else xmean
-
-
-Stack = []
-Graph = set()
-Labels = {}
-
-
-class Trace:
-
-    def __init__(self, fn):
-        self.fn = fn
-
-    def __enter__(self):
-        if Stack:
-            Graph.add((Stack[-1], self.fn))
-        else:
-            Stack.clear()
-            Graph.clear()
-        Stack.append(self.fn)
-        return self
-
-    def __exit__(self, type, value, traceback):
-        Stack.pop()
-
-
-def trace(label=None):
-
-    def wrap(f):
-        Labels[f] = label if label != None else f.__name__ if hasattr(
-            f, '__name__') else str(f)
-
-        @functools.wraps(f)
-        def wrap0(*args, **kwargs):
-            with Trace(f) as T:
-                return f(*args, **kwargs)
-
-        return wrap0
-
-    return wrap
-
-
-def graphviz(buf):
-    Numbers = {}
-    Vertices = set()
-    buf.write("digraph {\n")
-    for v, w in Graph:
-        Vertices.add(v)
-        Vertices.add(w)
-    for i, v in enumerate(Vertices):
-        Numbers[v] = i
-        buf.write('%d [label = "%s"]\n' % (i, Labels[v]))
-    for v, w in Graph:
-        buf.write("%d -> %d\n" % (Numbers[v], Numbers[w]))
-    buf.write("}\n")
