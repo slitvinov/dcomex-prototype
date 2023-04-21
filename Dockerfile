@@ -10,6 +10,7 @@ RUN apt-get -qq install --no-install-recommends cmake
 RUN apt-get -qq install --no-install-recommends g++
 RUN apt-get -qq install --no-install-recommends git
 RUN apt-get -qq install --no-install-recommends libgsl-dev
+RUN apt-get -qq install --no-install-recommends mpich
 RUN apt-get -qq install --no-install-recommends pkg-config
 RUN apt-get -qq install --no-install-recommends python3-dev
 RUN apt-get -qq install --no-install-recommends python3-matplotlib
@@ -17,7 +18,7 @@ RUN apt-get -qq install --no-install-recommends python3-mpi4py
 RUN apt-get -qq install --no-install-recommends python3-numpy
 RUN apt-get -qq install --no-install-recommends python3-pybind11
 RUN apt-get -qq install --no-install-recommends python3-scipy
-RUN apt-get -qq install --no-install-recommends mpich
+RUN apt-get -qq install --no-install-recommends wget
 WORKDIR /
 RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O /tmp/packages-microsoft-prod.deb
 RUN dpkg --install /tmp/packages-microsoft-prod.deb
