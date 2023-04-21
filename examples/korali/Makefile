@@ -6,6 +6,7 @@ PY = python3
 MPICC = mpicc
 MPICXX = mpicxx
 LINK = $(MPICXX)
+USER = 0
 
 include obj.mk
 include py.mk
@@ -25,7 +26,10 @@ clean:
 	rm -f $O libkorali.so
 
 install: libkorali.so $P
-	p=`'$(PY)' -m site --user-site` || exit 2 && \
+	case '$(USER)' in \
+	    0) p=`'$(PY)' -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 ;; \
+	    *) p=`'$(PY)' -m site --user-site` || exit 2 ;; \
+	esac && \
 	for i in $P; \
 	do b=`echo "$$i" | sed 's,korali/python/,,g'` && \
 	   d=`dirname "$$b"` && \
