@@ -7,6 +7,7 @@ PREFIX = /usr
 USER = 0
 
 M = \
+setup.py\
 follow.py\
 graph.py\
 kahan.py\
@@ -21,11 +22,9 @@ bin: $B
 
 lib: $M
 	case '$(USER)' in \
-	    0) p=`'$(PY)' -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 ;; \
-	    *) p=`'$(PY)' -m site --user-site` || exit 2 ;; \
-	esac && \
-	mkdir -p -- "$$p" && \
-	for i in $M; do cp -- "$$i" "$$p/$$f" || exit 2; done
+	    0) '$(PY)' setup.py install ;; \
+	    *) '$(PY)' setup.py install --user ;; \
+	esac
 
 ms:
 	mkdir -p -- '$(PREFIX)/share' '$(PREFIX)/bin'

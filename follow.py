@@ -53,12 +53,8 @@ def graphviz(buf):
 
 
 def loop():
-    return loop0(Edges)
-
-
-def loop0(edges):
     adj = {}
-    for i, j in edges:
+    for i, j in Edges:
         if not i in adj:
             adj[i] = set()
         if not j in adj:
