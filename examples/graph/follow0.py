@@ -2,17 +2,18 @@ import follow
 
 
 @follow.follow()
-def a(i):
-    b(i)
+def a():
+    b()
 
 
 @follow.follow(label="B")
-def b(i):
-    c(i)
+def b():
+    c(0)
 
 
 c = follow.follow(label="c")(lambda i: i, )
-a(10)
+a()
 
-with open("follow.gv", "w") as file:
+print("has loop:", follow.loop())
+with open("follow0.gv", "w") as file:
     follow.graphviz(file)

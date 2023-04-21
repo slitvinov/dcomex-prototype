@@ -1,7 +1,7 @@
 import functools
 
 Stack = []
-Graph = set()
+Edges = set()
 Labels = {}
 
 
@@ -12,7 +12,7 @@ class Follow:
 
     def __enter__(self):
         if Stack:
-            Graph.add((Stack[-1], self.fn))
+            Edges.add((Stack[-1], self.fn))
         Stack.append(self.fn)
         return self
 
@@ -41,12 +41,38 @@ def graphviz(buf):
     Numbers = {}
     Vertices = set()
     buf.write("digraph {\n")
-    for v, w in Graph:
+    for v, w in Edges:
         Vertices.add(v)
         Vertices.add(w)
     for i, v in enumerate(Vertices):
         Numbers[v] = i
         buf.write('%d [label = "%s"]\n' % (i, Labels[v]))
-    for v, w in Graph:
+    for v, w in Edges:
         buf.write("%d -> %d\n" % (Numbers[v], Numbers[w]))
     buf.write("}\n")
+
+
+def loop():
+    return loop0(Edges)
+
+
+def loop0(edges):
+    adj = {}
+    for i, j in edges:
+        if not i in adj:
+            adj[i] = set()
+        if not j in adj:
+            adj[j] = set()
+        adj[i].add(j)
+    for v in adj:
+        visited = set()
+        if not v in visited:
+            stack = [v]
+            while stack:
+                v = stack.pop()
+                if v in visited:
+                    return True
+                else:
+                    visited.add(v)
+                    stack.extend(adj[v])
+    return False

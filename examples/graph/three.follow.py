@@ -30,5 +30,6 @@ samples = graph.metropolis(lambda psi: l0(psi) * prior(psi),
                            draws=500,
                            init=[50],
                            scale=[20])
+print("has loop:", follow.loop())
 with open("three.follow.gv", "w") as file:
     follow.graphviz(file)

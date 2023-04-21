@@ -1,5 +1,4 @@
 import math
-import matplotlib.pylab as plt
 import numpy as np
 import random
 import statistics
@@ -48,27 +47,12 @@ def prior(psi):
     return 1 if -4 <= psi[0] <= 4 else 0
 
 
-def fpost(psi):
-    return 0.4225878520215124 * math.exp(-0.5150415081492156 * psi**2 +
-                                         2.100150038994303 * psi -
-                                         2.160126048590465)
-
-
 samples = graph.metropolis(lambda psi: likelihood(psi) * prior(psi),
                            draws=100,
                            init=[0],
                            scale=[1.0])
-psi = np.linspace(-4, 4, 100)
-post = [fpost(e) for e in psi]
-plt.yticks([])
-plt.xlim(-2, 5)
-plt.hist([e[0] for e in samples],
-         50,
-         density=True,
-         histtype='step',
-         linewidth=2)
-plt.plot(psi, post)
-plt.savefig("analitical.vis.png")
-
+for s in samples:
+    break
+print("has loop:", follow.loop())
 with open("analitical.follow.gv", "w") as file:
     follow.graphviz(file)
