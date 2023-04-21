@@ -63,7 +63,9 @@ graph.metropolis: accept = 0.7068
   pipelines via CI/CD at CSCS
 * [docs](docs): Sphinx documentation
 * [examples](examples): tutorials and examples
-* [graph.py](graph.py): a module to sample Bayesian graphs
+* [graph.py](graph.py): sample Bayesian graphs
+* [follow.py](follow.py): trace function evalution and detect loops
+* [kahan.py](kahan.py): Kahan summation or compensated summation algorithms
 * [integration](integration): code and configuration data used to
   integrate Msolve and korali
 * [korali](korali): git submodule for the version of korali
@@ -74,4 +76,4 @@ graph.metropolis: accept = 0.7068
 * [tests](tests): unit and integration tests
 
 The online documentation is at
-[ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest/).
+[ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest).
