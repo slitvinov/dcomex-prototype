@@ -6,6 +6,13 @@ PY = python3
 CXX = g++
 LINK = $(CXX)
 USER = 0
+CXXFLAGS_PYTHON = `pkg-config --cflags python3`
+CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
+CXXFLAGS_GSL = `pkg-config --cflags gsl`
+CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`
+
+LDFLAGS_GSL = `pkg-config --cflags gsl`
+LDFLAGS_MPI = `pkg-config --libs mpi-cxx`
 
 include obj.mk
 include py.mk
@@ -16,18 +23,18 @@ all: libkorali.so
 	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
 .cpp.o:
-	$(CXX) -c -fPIC -std=c++17 -I. -Ikorali/source `pkg-config --cflags python3 eigen3 mpi-cxx` $(CXXFLAGS) $< -o $@
+	$(CXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_PYTHON) $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_MPI) $(CXXFLAGS) $< -o $@
 
 libkorali.so: $O
-	$(LINK) -shared $O $(LDFLAGS) `pkg-config --libs gsl mpi-cxx` -o $@
+	$(LINK) -shared $O $(LDFLAGS_GSL) $(LDFLAGS_MPI) $(LDFLAGS) -o $@
 
 clean:
 	rm -f $O libkorali.so
 
 install: libkorali.so $P
 	case '$(USER)' in \
-	    0) p=`'$(PY)' -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 ;; \
-	    *) p=`'$(PY)' -m site --user-site` || exit 2 ;; \
+	    0) p=`$(PY) -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 ;; \
+	    *) p=`$(PY) -m site --user-site` || exit 2 ;; \
 	esac && \
 	for i in $P; \
 	do b=`echo "$$i" | sed 's,korali/python/,,g'` && \

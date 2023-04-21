@@ -25,7 +25,8 @@ RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-p
 RUN dpkg --install /tmp/packages-microsoft-prod.deb
 RUN apt-get -qq update
 RUN apt-get -qq install --no-install-recommends dotnet-sdk-6.0
-RUN git clone --quiet --single-branch --depth 1 --recurse-submodules https://github.com/slitvinov/dcomex-prototype src
+RUN git clone --quiet --single-branch --depth 1 https://github.com/slitvinov/dcomex-prototype src
 WORKDIR /src/examples/korali/
-RUN ln -fs ../../korali .
-RUN make -j4
+RUN git clone --quiet --single-branch https://github.com/cselab/korali
+RUN cd korali && git checkout c70d8e32258b7e2b9ed977576997dfe946816419
+RUN make install -j4
