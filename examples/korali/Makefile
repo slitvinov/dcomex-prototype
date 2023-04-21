@@ -3,9 +3,8 @@
 .SUFFIXES: .c .cpp .o
 
 PY = python3
-MPICC = mpicc
-MPICXX = mpicxx
-LINK = $(MPICXX)
+CXX = g++
+LINK = $(CXX)
 USER = 0
 
 include obj.mk
@@ -14,13 +13,13 @@ include py.mk
 all: libkorali.so
 
 .c.o:
-	$(MPICC) -c -fPIC $(CFLAGS) $< -o $@
+	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
 .cpp.o:
-	$(MPICXX) -c -fPIC -std=c++17 -I. -Ikorali/source `pkg-config --cflags python3 eigen3` $(CXXFLAGS) $< -o $@
+	$(CXX) -c -fPIC -std=c++17 -I. -Ikorali/source `pkg-config --cflags python3 eigen3 mpi-cxx` $(CXXFLAGS) $< -o $@
 
 libkorali.so: $O
-	$(LINK) -shared $O $(LDFLAGS) `pkg-config --libs gsl` -o $@
+	$(LINK) -shared $O $(LDFLAGS) `pkg-config --libs gsl mpi-cxx` -o $@
 
 clean:
 	rm -f $O libkorali.so

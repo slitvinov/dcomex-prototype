@@ -9,8 +9,9 @@ RUN apt-get -qq install --no-install-recommends apt-transport-https
 RUN apt-get -qq install --no-install-recommends cmake
 RUN apt-get -qq install --no-install-recommends g++
 RUN apt-get -qq install --no-install-recommends git
+RUN apt-get -qq install --no-install-recommends libeigen3-dev
 RUN apt-get -qq install --no-install-recommends libgsl-dev
-RUN apt-get -qq install --no-install-recommends mpich
+RUN apt-get -qq install --no-install-recommends libmpich-dev
 RUN apt-get -qq install --no-install-recommends pkg-config
 RUN apt-get -qq install --no-install-recommends python3-dev
 RUN apt-get -qq install --no-install-recommends python3-matplotlib
@@ -27,4 +28,4 @@ RUN apt-get -qq install --no-install-recommends dotnet-sdk-6.0
 RUN git clone --quiet --single-branch --depth 1 --recurse-submodules https://github.com/slitvinov/dcomex-prototype src
 WORKDIR /src/examples/korali/
 RUN ln -fs ../../korali .
-RUN pwd >&2 && cat Makefile >&2 && make -j 4 install
+RUN make -j4
