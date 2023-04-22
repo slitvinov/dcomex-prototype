@@ -11,7 +11,7 @@ CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
 CXXFLAGS_GSL = `pkg-config --cflags gsl`
 CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`
 
-LDFLAGS_GSL = `pkg-config --cflags gsl`
+LDFLAGS_GSL = `pkg-config --libs gsl`
 LDFLAGS_MPI = `pkg-config --libs mpi-cxx`
 
 include obj.mk
