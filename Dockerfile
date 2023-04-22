@@ -1,6 +1,5 @@
 FROM docker.io/nvidia/cuda:11.2.0-cudnn8-devel-ubuntu20.04
 ARG GIT_SSL_NO_VERIFY=1
-ARG MPICH_VERSION=3.1.4
 ARG TZ=Europe/Zurich
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update
