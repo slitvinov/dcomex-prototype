@@ -33,7 +33,7 @@ clean:
 
 install: libkorali.so $P
 	case '$(USER)' in \
-	    0) p=`$(PY) -c "import sysconfig; print(sysconfig.get_path('purelib'))"` || exit 2 ;; \
+	    0) p=`$(PY) -c "import site; print(site.getsitepackages()[0])"` || exit 2 ;; \
 	    *) p=`$(PY) -m site --user-site` || exit 2 ;; \
 	esac && \
 	for i in $P; \
