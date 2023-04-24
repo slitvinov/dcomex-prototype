@@ -17,7 +17,7 @@ except ImportError:
 
 class Integral:
     """Caches the samples to evalute the integral several times
-        """
+    """
 
     def __init__(self,
                  data_given_theta,
@@ -191,6 +191,7 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
               False)
         trace : bool
               return a trace of the algorithm (default: False)
+
         Return
         ----------
         samples : list

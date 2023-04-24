@@ -18,6 +18,6 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = ['_build']
-html_theme = 'alabaster'
+html_theme = 'classic'
 html_static_path = ['_static']
 autoclass_content = 'both'
