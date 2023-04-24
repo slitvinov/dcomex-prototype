@@ -5,15 +5,6 @@ Graphs
 
 This section describes the graph sampling module.
 
-Approach
-########
-
-
-Python module
-#############
-
-Here we describe the graph python module and its functions.
-
 Summary
 -------
 

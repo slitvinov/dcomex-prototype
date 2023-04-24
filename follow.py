@@ -21,7 +21,40 @@ class Follow:
 
 
 def follow(label=None):
+    """ 
+    Decorator that allows a function to be "followed" in a call graph.
 
+    Parameters
+    ----------
+    label : str, optional
+        A label for the wrapped function in the call graph. If not provided, 
+        the function name will be used as the label.
+
+    Returns
+    -------
+    function
+        A wrapped version of the input function that can be used to generate 
+        a call graph.
+
+    Examples
+    --------
+    >>> @follow()
+    ... def add(a, b):
+    ...     return a + b
+    >>> add(2, 3)
+    5
+
+    >>> @follow(label='Subtract')
+    ... def sub(a, b):
+    ...     return a - b
+    >>> sub(5, 2)
+    3
+
+    >>> add = follow()(lambda a, b: a + b)
+    >>> add(2, 3)
+    5
+
+    """    
     def wrap(f):
         Labels[f] = label if label != None else f.__name__ if hasattr(
             f, '__name__') else str(f)
@@ -38,6 +71,20 @@ def follow(label=None):
 
 
 def graphviz(buf):
+    """
+    Decorator that generates a call graph of the decorated functions.
+
+    Parameters
+    ----------
+    buf : TextIOWrapper
+        A file-like object that the graph will be written to.
+
+    Returns
+    -------
+    None
+
+    """
+    
     Numbers = {}
     Vertices = set()
     buf.write("digraph {\n")
@@ -53,6 +100,48 @@ def graphviz(buf):
 
 
 def loop():
+    """
+    Determines whether there is a loop in the call graph.
+
+    Returns
+    -------
+    bool
+        True if there is a loop in the call graph, False otherwise.
+
+    Examples
+    --------
+    >>> @follow()
+    ... def func1(x):
+    ...     if x > 0:
+    ...         return func2(x-1)
+    ...     else:
+    ...         return 0
+    >>> @follow()
+    ... def func2(x):
+    ...     if x > 0:
+    ...         return func1(x-1)
+    ...     else:
+    ...         return 0
+    >>> func2(42)
+    0
+    >>> has_loop = loop()
+    >>> print(has_loop)
+    True
+
+    >>> @follow()
+    ... def func1(x):
+    ...     return func2(x-1)
+    >>> 
+    >>> @follow()
+    ... def func2(x):
+    ...     pass
+    >>> func2(42)
+    >>> loop()
+    True
+
+
+    """
+    
     adj = {}
     for i, j in Edges:
         if not i in adj:

@@ -2,21 +2,45 @@
 .SUFFIXES:
 .SUFFIXES: .c .cpp .o
 
-MPICC = mpicc
-MPICXX = mpicxx
-LINK = $(MPICXX)
+PY = python3
+CXX = g++
+LINK = $(CXX)
+USER = 0
+CXXFLAGS_PYTHON = `pkg-config --cflags python3`
+CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
+CXXFLAGS_GSL = `pkg-config --cflags gsl`
+CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`
+
+LDFLAGS_GSL = `pkg-config --libs gsl`
+LDFLAGS_MPI = `pkg-config --libs mpi-cxx`
 
 include obj.mk
+include py.mk
+
 all: libkorali.so
 
 .c.o:
-	$(MPICC) -c -fPIC $(CFLAGS) $< -o $@
+	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
 .cpp.o:
-	$(MPICXX) -c -fPIC -std=c++17 -I. -Isource `pkg-config --cflags python3 eigen3` $(CXXFLAGS) $< -o $@
+	$(CXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_PYTHON) $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_MPI) $(CXXFLAGS) $< -o $@
 
 libkorali.so: $O
-	$(LINK) $(LDFLAGS) -shared $O -o $@
+	$(LINK) -shared $O $(LDFLAGS_GSL) $(LDFLAGS_MPI) $(LDFLAGS) -o $@
 
 clean:
 	rm -f $O libkorali.so
+
+install: libkorali.so $P
+	case '$(USER)' in \
+	    0) p=`$(PY) -c "import site; print(site.getsitepackages()[0])"` || exit 2 ;; \
+	    *) p=`$(PY) -m site --user-site` || exit 2 ;; \
+	esac && \
+	for i in $P; \
+	do b=`echo "$$i" | sed 's,korali/python/,,g'` && \
+	   d=`dirname "$$b"` && \
+	   mkdir -p -- "$$p/$$d/" && \
+	   cp -- "$$i" "$$p/$$d/" || exit 2; \
+	done && \
+	cp -- libkorali.so "$$p/korali/" && \
+	printf '%s\n' "$$p"
