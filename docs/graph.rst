@@ -4,19 +4,15 @@ Graphs
 ======
 
 The code is a Python package containing classes and functions for
-estimating integrals using various sampling algorithms. The package
-imports modules such as math, random, statistics, sys, and follow. It
-also tries to import scipy.special and numpy, but if the import fails,
-they are assigned None.
-
-The Integral class in the package caches samples and evaluates the
-integral given a hyperparameter psi. It takes two callable arguments:
-data_given_theta, which is the joint probability of the observed data
-viewed as a function of parameter, and theta_given_psi, which is the
-conditional probability of parameters theta given hyperparameter
-psi. The method parameter specifies the type of sampling algorithm to
-use, and the options parameter is a dictionary of options for the
-sampling algorithm.
+estimating integrals using various sampling algorithms. The Integral
+class in the package caches samples and evaluates the integral given a
+hyperparameter psi. It takes two callable arguments: data_given_theta,
+which is the joint probability of the observed data viewed as a
+function of parameter, and theta_given_psi, which is the conditional
+probability of parameters theta given hyperparameter psi. The method
+parameter specifies the type of sampling algorithm to use, and the
+options parameter is a dictionary of options for the sampling
+algorithm.
 
 The package contains several sampling algorithms implemented as
 functions, including metropolis and langevin. metropolis is a

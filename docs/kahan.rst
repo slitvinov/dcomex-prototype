@@ -1,7 +1,7 @@
 .. _kahan:
 
 Kahan
-======
+=====
 
 The kahan package provides efficient implementations of Kahan's
 algorithms for numerical summation and other basic statistical

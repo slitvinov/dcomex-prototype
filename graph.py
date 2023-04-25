@@ -16,9 +16,6 @@ except ImportError:
 
 
 class Integral:
-    """Caches the samples to evaluate the integral several times.
-
-    """
 
     def __init__(self,
                  data_given_theta,
