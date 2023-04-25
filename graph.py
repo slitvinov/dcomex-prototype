@@ -121,24 +121,47 @@ class Integral:
 def metropolis(fun, draws, init, scale, log=False):
     """Metropolis sampler
 
-        Parameters
-        ----------
-        fun : callable
-              the unnormalized density or the log unnormalized probability
-              (see log)
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        scale : tuple
-              the scale of the proposal distribution (same size as init)
-        log : bool
-              set True to assume log-probability (default: False)
+    Parameters
+    ----------
+    fun : callable
+        The unnormalized density or the log unnormalized probability. If `log`
+        is True, `fun` should return the log unnormalized probability. Otherwise,
+        it should return the unnormalized density.
+    draws : int
+        The number of samples to draw.
+    init : tuple
+        The initial point.
+    scale : tuple
+        The scale of the proposal distribution. Should be the same size as `init`.
+    log : bool, optional
+        If True, assume that `fun` returns the log unnormalized probability.
+        Default is False.
 
-        Return
-        ----------
-        samples : list
-              list of samples"""
+    Returns
+    -------
+    samples : list
+        A list of `draws` samples.
+
+    Examples
+    --------
+    Define a log unnormalized probability function for a standard normal distribution:
+
+    >>> import math
+    >>> import random
+    >>> import statistics
+    >>> random.seed(12345)
+    >>> def log_normal(x):
+    ...     return -0.5 * x[0]**2
+
+    Draw 1000 samples from the distribution starting at 0, with proposal standard deviation 1:
+    >>> samples = list(metropolis(log_normal, 10000, [0], [1], log=True))
+
+    Check that the mean and standard deviation of the samples are close to 0 and 1, respectively:
+    >>> math.isclose(statistics.fmean(s[0] for s in samples), 0, abs_tol=0.05)
+    True
+    >>> math.isclose(statistics.fmean(s[0]**2 for s in samples), 1, abs_tol=0.05)
+    True
+    """
 
     def flin(pp, p):
         return pp > random.uniform(0, 1) * p
