@@ -16,9 +16,6 @@ analitical.py
 .. literalinclude:: ../examples/graph/analitical.py
    :language: python
 
-.. literalinclude:: ../examples/graph/analitical.out
-   :language: sh
-
 .. image:: ../examples/graph/analitical.png
 
 cmaes0.py
@@ -155,15 +152,24 @@ tmcmc0.py
 .. literalinclude:: ../examples/graph/tmcmc0.py
    :language: python
 
+.. literalinclude:: ../examples/graph/tmcmc0.out
+   :language: sh
+
 tmcmc1.py
 ------------------------
 .. literalinclude:: ../examples/graph/tmcmc1.py
    :language: python
 
+.. literalinclude:: ../examples/graph/tmcmc1.out
+   :language: sh
+
 tmcmc2.py
 ------------------------
 .. literalinclude:: ../examples/graph/tmcmc2.py
    :language: python
+
+.. literalinclude:: ../examples/graph/tmcmc2.out
+   :language: sh
 
 .. image:: ../examples/graph/tmcmc2.png
 

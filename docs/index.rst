@@ -1,5 +1,5 @@
-DComEX Framework's
-==================
+DComEX Framework
+================
 
 .. toctree::
    :maxdepth: 1
