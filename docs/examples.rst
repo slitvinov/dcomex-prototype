@@ -6,40 +6,40 @@ analitical.follow.py
 .. literalinclude:: ../examples/graph/analitical.follow.py
    :language: python
 
-.. image:: ../examples/graph/analitical.follow.png
-
 .. literalinclude:: ../examples/graph/analitical.follow.out
    :language: sh
+
+.. image:: ../examples/graph/analitical.follow.png
 
 analitical.py
 ------------------------
 .. literalinclude:: ../examples/graph/analitical.py
    :language: python
 
-.. image:: ../examples/graph/analitical.png
-
 .. literalinclude:: ../examples/graph/analitical.out
    :language: sh
+
+.. image:: ../examples/graph/analitical.png
 
 cmaes0.py
 ------------------------
 .. literalinclude:: ../examples/graph/cmaes0.py
    :language: python
 
-.. image:: ../examples/graph/cmaes0.png
-
 .. literalinclude:: ../examples/graph/cmaes0.out
    :language: sh
+
+.. image:: ../examples/graph/cmaes0.png
 
 coins.py
 ------------------------
 .. literalinclude:: ../examples/graph/coins.py
    :language: python
 
-.. image:: ../examples/graph/coins.png
-
 .. literalinclude:: ../examples/graph/coins.out
    :language: sh
+
+.. image:: ../examples/graph/coins.png
 
 coins.vis.py
 ------------------------
