@@ -16,12 +16,13 @@ extensions = [
     'sphinx_automodapi.automodapi'
 ]
 
-html_theme = 'classic'
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
-autoclass_content = 'both'
 
 latex_documents = [
     ('index', 'dcomex.tex', u'DComEX Documentation',
      author, 'howto'),
 ]
+
+autoclass_content = 'both'
