@@ -28,6 +28,7 @@ unnormalized probability, the standard deviation of the proposal
 distribution, and a boolean indicating whether to assume
 log-probability.
 
+
 Summary
 -------
 
@@ -45,3 +46,4 @@ Functions
 .. autofunction:: graph.cmaes
 .. autofunction:: graph.metropolis
 .. autofunction:: graph.tmcmc
+

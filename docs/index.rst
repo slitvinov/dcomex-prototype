@@ -4,8 +4,9 @@ DComEX Framework's
 .. toctree::
    :maxdepth: 1
 
-   intro     
-   graph
+   intro
    follow
+   graph
    kahan
    integration
+   examples

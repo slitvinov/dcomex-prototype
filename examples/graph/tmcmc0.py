@@ -26,7 +26,7 @@ D = (
 )
 N = 1000
 M = 50
-beta = float(sys.argv[1])
+beta = 1.0
 print("beta = %g" % beta)
 for name, d, dev, w in D:
     a = [0.5] * d
