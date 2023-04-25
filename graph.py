@@ -16,7 +16,8 @@ except ImportError:
 
 
 class Integral:
-    """Caches the samples to evalute the integral several times
+    """Caches the samples to evaluate the integral several times.
+
     """
 
     def __init__(self,
@@ -24,24 +25,51 @@ class Integral:
                  theta_given_psi,
                  method="metropolis",
                  **options):
-        """data_given_theta : callable
-                      the join probability of the observed data viewed
-                      as a function of parameter
-                theta_given_psi : callable
-                      conditional probability of parameters theta given
-                      hyper-parameter psi
-                method : str or callable, optional
-                      the type of the sampling algorithm to sample from
-                      data_given_theta. Can be one of
+        """Caches the samples to evaluate the integral several times.
 
-                      - metropolis (default)
-                      - langevin
-                      - tmcmc
-                      - korali (WIP)
-                      - hamiltonian (WIP)
+        Parameters
+        ----------
+        data_given_theta : callable
+            The joint probability of the observed data viewed as a function of parameter.
+        theta_given_psi : callable
+            The conditional probability of parameters theta given hyper-parameter psi.
+        method : str or callable, optional
+            The type of the sampling algorithm to sample from `data_given_theta`.
+            Can be one of:
 
-                options : dict, optional
-                      a dictionary of options for the sampling algorithm"""
+            - 'metropolis' (default)
+            - 'langevin'
+            - 'tmcmc'
+            - 'korali' (WIP)
+            - 'hamiltonian' (WIP)
+        **options : dict, optional
+            A dictionary of options for the sampling algorithm.
+
+        Attributes
+        ----------
+        samples : List
+            A list of samples obtained from the sampling algorithm.
+
+        Raises
+        ------
+        ValueError
+            If the provided sampling method is unknown.
+
+        Examples
+        --------
+        >>> import random
+        >>> import numpy as np
+        >>> random.seed(123456)
+        >>> np.random.seed(123456)
+        >>> data = np.random.normal(0, 1, size=1000)
+        >>> data_given_theta = lambda theta: np.prod(np.exp(-0.5 * (data - theta[0]) ** 2))
+        >>> theta_given_psi = lambda theta, psi: np.exp(-0.5 * (theta[0] - psi[0]) ** 2)
+        >>> integral = Integral(data_given_theta, theta_given_psi, method='metropolis',
+        ... init=[0], scale=[0.1], draws=1000)
+        >>> integral([0])  # Evaluate the integral for psi=0
+        0.9984153240011582
+
+        """
         self.theta_given_psi = theta_given_psi
         if hasattr(self.theta_given_psi, '_f'):
             follow.Stack.append(self.theta_given_psi._f)
@@ -61,7 +89,34 @@ class Integral:
             follow.Stack.pop()
 
     def __call__(self, psi):
-        """Estimate the integral given hyproparameter psi"""
+        """Compute the integral estimate for a given hyperparameter.
+
+        Parameters
+        ----------
+        psi : array_like
+            The hyperparameter values at which to evaluate the integral estimate.
+
+        Returns
+        -------
+        float
+            The estimated value of the integral.
+
+        Examples
+        --------
+        >>> import random
+        >>> from scipy.stats import norm
+        >>> random.seed(123456)
+        >>> np.random.seed(123456)
+        >>> def data_given_theta(theta):
+        ...     return norm.pdf(theta[0], loc=1, scale=2) * norm.pdf(theta[0], loc=3, scale=2)
+        >>> def theta_given_psi(theta, psi):
+        ...     return norm.pdf(theta[0], loc=psi[0], scale=[1])
+        >>> integral = Integral(data_given_theta, theta_given_psi, method="metropolis",
+        ...    draws=1000, scale=[1.0], init=[0])
+        >>> integral([2])
+        0.2388726795076229
+
+        """
         return statistics.fmean(
             self.theta_given_psi(theta, psi) for theta in self.samples)
 
