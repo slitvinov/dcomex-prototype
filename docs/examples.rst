@@ -46,10 +46,16 @@ coins.vis.py
 .. literalinclude:: ../examples/graph/coins.vis.py
    :language: python
 
+.. literalinclude:: ../examples/graph/coins.vis.out
+   :language: sh
+
 follow0.py
 ------------------------
 .. literalinclude:: ../examples/graph/follow0.py
    :language: python
+
+.. literalinclude:: ../examples/graph/follow0.out
+   :language: sh
 
 .. image:: ../examples/graph/follow0.png
 
@@ -58,12 +64,18 @@ follow1.py
 .. literalinclude:: ../examples/graph/follow1.py
    :language: python
 
+.. literalinclude:: ../examples/graph/follow1.out
+   :language: sh
+
 .. image:: ../examples/graph/follow1.png
 
 langevin0.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin0.py
    :language: python
+
+.. literalinclude:: ../examples/graph/langevin0.out
+   :language: sh
 
 .. image:: ../examples/graph/langevin0.png
 
@@ -72,12 +84,18 @@ langevin1.py
 .. literalinclude:: ../examples/graph/langevin1.py
    :language: python
 
+.. literalinclude:: ../examples/graph/langevin1.out
+   :language: sh
+
 .. image:: ../examples/graph/langevin1.png
 
 langevin2.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin2.py
    :language: python
+
+.. literalinclude:: ../examples/graph/langevin2.out
+   :language: sh
 
 .. image:: ../examples/graph/langevin2.png
 
@@ -86,10 +104,16 @@ langevin3.py
 .. literalinclude:: ../examples/graph/langevin3.py
    :language: python
 
+.. literalinclude:: ../examples/graph/langevin3.out
+   :language: sh
+
 langevin4.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin4.py
    :language: python
+
+.. literalinclude:: ../examples/graph/langevin4.out
+   :language: sh
 
 .. image:: ../examples/graph/langevin4.png
 
@@ -98,10 +122,16 @@ metropolis0.py
 .. literalinclude:: ../examples/graph/metropolis0.py
    :language: python
 
+.. literalinclude:: ../examples/graph/metropolis0.out
+   :language: sh
+
 three.follow.py
 ------------------------
 .. literalinclude:: ../examples/graph/three.follow.py
    :language: python
+
+.. literalinclude:: ../examples/graph/three.follow.out
+   :language: sh
 
 .. image:: ../examples/graph/three.follow.png
 
@@ -109,6 +139,9 @@ three.py
 ------------------------
 .. literalinclude:: ../examples/graph/three.py
    :language: python
+
+.. literalinclude:: ../examples/graph/three.out
+   :language: sh
 
 .. image:: ../examples/graph/three.png
 
