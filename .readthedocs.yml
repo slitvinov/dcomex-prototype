@@ -1,3 +1,9 @@
+version: 2
 python:
-  version: 3
-requirements_file: docs/requirements.txt
+   install:
+   - requirements: docs/requirements.txt
+formats:
+  - pdf
+sphinx
+   builder: singlehtml
+   configuration: docs/conf.py

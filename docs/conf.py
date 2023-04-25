@@ -16,8 +16,25 @@ extensions = [
     'sphinx_automodapi.automodapi'
 ]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build']
-html_theme = 'classic'
+html_theme_options = {
+  "logo": {
+      "image_light": "logo.png",
+      "image_dark": "logo.png",
+  },
+  "github_url": "https://github.com/DComEX/dcomex-prototype",
+  "collapse_navigation": True,
+}
+
+
+html_title = project
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_favicon = '_static/favicon.ico'
+html_context = {"default_mode": "dark"}
+
+latex_documents = [
+    ('index', 'dcomex.tex', u'DComEX Documentation',
+     author, 'howto'),
+]
+
 autoclass_content = 'both'

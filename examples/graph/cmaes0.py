@@ -1,10 +1,14 @@
 import math
 import graph
 import matplotlib.pyplot as plt
-import numpy as np
 import random
+import sys
 import scipy.linalg
 
+def print0(l):
+    for i in l:
+        sys.stdout.write("%+7.2e " % i)
+    sys.stdout.write("\n")
 
 def frandom(x):
     return random.uniform(0, 1)
@@ -35,11 +39,11 @@ def cigar(x):
 
 
 random.seed(1234)
-print(graph.cmaes(elli, (2, 2, 2, 2), 1, 167))
-print(graph.cmaes(sphere, 8 * [1], 1, 100))
-print(graph.cmaes(cigar, 8 * [1], 1, 300))
-print(graph.cmaes(rosen, 8 * [0], 0.5, 439))
-print(graph.cmaes(flower, (1, 1), 1, 200))
+print0(graph.cmaes(elli, (2, 2, 2, 2), 1, 167))
+print0(graph.cmaes(sphere, 8 * [1], 1, 100))
+print0(graph.cmaes(cigar, 8 * [1], 1, 300))
+print0(graph.cmaes(rosen, 8 * [0], 0.5, 439))
+print0(graph.cmaes(flower, (1, 1), 1, 200))
 
 trace = graph.cmaes(elli, 10 * [0.1], 0.1, 600, trace=True)
 nfev, fmin, xmin, sigma, C, *rest = zip(*trace)
@@ -79,4 +83,4 @@ plt.ylabel("scales")
 plt.yscale("log")
 for s in zip(*scale):
     plt.plot(nfev, s)
-plt.show()
+plt.savefig("cmaes0.png")

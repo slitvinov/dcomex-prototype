@@ -20,6 +20,21 @@ class Follow:
         Stack.pop()
 
 
+def clear():
+    """
+    Create a new context for following functions.
+
+    Returns
+    -------
+    None
+
+    """
+
+    Stack.clear()
+    Edges.clear()
+    Labels.clear()
+
+
 def follow(label=None):
     """ 
     Decorator that allows a function to be "followed" in a call graph.
@@ -54,7 +69,8 @@ def follow(label=None):
     >>> add(2, 3)
     5
 
-    """    
+    """
+
     def wrap(f):
         Labels[f] = label if label != None else f.__name__ if hasattr(
             f, '__name__') else str(f)
@@ -83,19 +99,46 @@ def graphviz(buf):
     -------
     None
 
+    Examples
+    --------
+    >>> from io import StringIO
+    >>> clear()
+    >>> @follow(label='Addition')
+    ... def add(a, b):
+    ...     return a + b
+    >>> @follow(label='Subtraction')
+    ... def sub(a, b):
+    ...     return a - b
+    >>> @follow()
+    ... def foo():
+    ...     add(1, 2)
+    ...     sub(4, 3)
+    >>> foo()
+    >>> buf = StringIO()
+    >>> graphviz(buf)
+    >>> print(buf.getvalue())
+    digraph {
+      0 [label = "Addition"]
+      1 [label = "Subtraction"]
+      2 [label = "foo"]
+      2 -> 1
+      2 -> 0
+    }
+    <BLANKLINE>
     """
-    
+
     Numbers = {}
     Vertices = set()
     buf.write("digraph {\n")
     for v, w in Edges:
         Vertices.add(v)
         Vertices.add(w)
+    Vertices = sorted(Vertices, key=lambda v: Labels[v])
     for i, v in enumerate(Vertices):
         Numbers[v] = i
-        buf.write('%d [label = "%s"]\n' % (i, Labels[v]))
+        buf.write('  %d [label = "%s"]\n' % (i, Labels[v]))
     for v, w in Edges:
-        buf.write("%d -> %d\n" % (Numbers[v], Numbers[w]))
+        buf.write("  %d -> %d\n" % (Numbers[v], Numbers[w]))
     buf.write("}\n")
 
 
@@ -110,6 +153,7 @@ def loop():
 
     Examples
     --------
+    >>> clear()
     >>> @follow()
     ... def func1(x):
     ...     if x > 0:
@@ -128,6 +172,7 @@ def loop():
     >>> print(has_loop)
     True
 
+    >>> clear()
     >>> @follow()
     ... def func1(x):
     ...     return func2(x-1)
@@ -137,11 +182,11 @@ def loop():
     ...     pass
     >>> func2(42)
     >>> loop()
-    True
+    False
 
 
     """
-    
+
     adj = {}
     for i, j in Edges:
         if not i in adj:

@@ -16,32 +16,57 @@ except ImportError:
 
 
 class Integral:
-    """Caches the samples to evalute the integral several times
-    """
 
     def __init__(self,
                  data_given_theta,
                  theta_given_psi,
                  method="metropolis",
                  **options):
-        """data_given_theta : callable
-                      the join probability of the observed data viewed
-                      as a function of parameter
-                theta_given_psi : callable
-                      conditional probability of parameters theta given
-                      hyper-parameter psi
-                method : str or callable, optional
-                      the type of the sampling algorithm to sample from
-                      data_given_theta. Can be one of
+        """Caches the samples to evaluate the integral several times.
 
-                      - metropolis (default)
-                      - langevin
-                      - tmcmc
-                      - korali (WIP)
-                      - hamiltonian (WIP)
+        Parameters
+        ----------
+        data_given_theta : callable
+            The joint probability of the observed data viewed as a function of parameter.
+        theta_given_psi : callable
+            The conditional probability of parameters theta given hyper-parameter psi.
+        method : str or callable, optional
+            The type of the sampling algorithm to sample from `data_given_theta`.
+            Can be one of:
 
-                options : dict, optional
-                      a dictionary of options for the sampling algorithm"""
+            - 'metropolis' (default)
+            - 'langevin'
+            - 'tmcmc'
+            - 'korali' (WIP)
+            - 'hamiltonian' (WIP)
+        options : dict, optional
+            A dictionary of options for the sampling algorithm.
+
+        Attributes
+        ----------
+        samples : List
+            A list of samples obtained from the sampling algorithm.
+
+        Raises
+        ------
+        ValueError
+            If the provided sampling method is unknown.
+
+        Examples
+        --------
+        >>> import random
+        >>> import numpy as np
+        >>> random.seed(123456)
+        >>> np.random.seed(123456)
+        >>> data = np.random.normal(0, 1, size=1000)
+        >>> data_given_theta = lambda theta: np.prod(np.exp(-0.5 * (data - theta[0]) ** 2))
+        >>> theta_given_psi = lambda theta, psi: np.exp(-0.5 * (theta[0] - psi[0]) ** 2)
+        >>> integral = Integral(data_given_theta, theta_given_psi, method='metropolis',
+        ... init=[0], scale=[0.1], draws=1000)
+        >>> integral([0])  # Evaluate the integral for psi=0
+        0.9984153240011582
+
+        """
         self.theta_given_psi = theta_given_psi
         if hasattr(self.theta_given_psi, '_f'):
             follow.Stack.append(self.theta_given_psi._f)
@@ -61,7 +86,34 @@ class Integral:
             follow.Stack.pop()
 
     def __call__(self, psi):
-        """Estimate the integral given hyproparameter psi"""
+        """Compute the integral estimate for a given hyperparameter.
+
+        Parameters
+        ----------
+        psi : array_like
+            The hyperparameter values at which to evaluate the integral estimate.
+
+        Returns
+        -------
+        float
+            The estimated value of the integral.
+
+        Examples
+        --------
+        >>> import random
+        >>> from scipy.stats import norm
+        >>> random.seed(123456)
+        >>> np.random.seed(123456)
+        >>> def data_given_theta(theta):
+        ...     return norm.pdf(theta[0], loc=1, scale=2) * norm.pdf(theta[0], loc=3, scale=2)
+        >>> def theta_given_psi(theta, psi):
+        ...     return norm.pdf(theta[0], loc=psi[0], scale=[1])
+        >>> integral = Integral(data_given_theta, theta_given_psi, method="metropolis",
+        ...    draws=1000, scale=[1.0], init=[0])
+        >>> integral([2])
+        0.2388726795076229
+
+        """
         return statistics.fmean(
             self.theta_given_psi(theta, psi) for theta in self.samples)
 
@@ -69,24 +121,53 @@ class Integral:
 def metropolis(fun, draws, init, scale, log=False):
     """Metropolis sampler
 
-        Parameters
-        ----------
-        fun : callable
-              the unnormalized density or the log unnormalized probability
-              (see log)
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        scale : tuple
-              the scale of the proposal distribution (same size as init)
-        log : bool
-              set True to assume log-probability (default: False)
+    Parameters
+    ----------
+    fun : callable
+        The unnormalized density or the log unnormalized probability. If `log`
+        is True, `fun` should return the log unnormalized probability. Otherwise,
+        it should return the unnormalized density.
+    draws : int
+        The number of samples to draw.
+    init : tuple
+        The initial point.
+    scale : tuple
+        The scale of the proposal distribution. Should be the same size as `init`.
+    log : bool, optional
+        If True, assume that `fun` returns the log unnormalized probability.
+        Default is False.
 
-        Return
-        ----------
-        samples : list
-              list of samples"""
+    Returns
+    -------
+    samples : list
+        A list of `draws` samples.
+
+    Examples
+    --------
+    Define a log unnormalized probability function for a standard
+    normal distribution:
+
+    >>> import math
+    >>> import random
+    >>> import statistics
+    >>> random.seed(12345)
+    >>> def log_normal(x):
+    ...     return -0.5 * x[0]**2
+
+    Draw 1000 samples from the distribution starting at 0, with
+    proposal standard deviation 1:
+
+    >>> samples = list(metropolis(log_normal, 10000, [0], [1], log=True))
+
+    Check that the mean and standard deviation of the samples are
+    close to 0 and 1, respectively:
+
+    >>> math.isclose(statistics.fmean(s[0] for s in samples), 0, abs_tol=0.05)
+    True
+    >>> math.isclose(statistics.fmean(s[0]**2 for s in samples), 1, abs_tol=0.05)
+    True
+
+    """
 
     def flin(pp, p):
         return pp > random.uniform(0, 1) * p
@@ -115,26 +196,40 @@ def metropolis(fun, draws, init, scale, log=False):
 def langevin(fun, draws, init, dfun, sigma, log=False):
     """Metropolis-adjusted Langevin (MALA) sampler
 
-        Parameters
-        ----------
-        fun : callable
-              the unnormalized density or the log unnormalized probability
-              (see log)
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        h : float
-              the step of the proposal
-        dfun : callable
-              the log unnormalized probability
-        log : bool
-              set True to assume log-probability (default: False)
+    Parameters
+    ----------
+    fun : callable
+          the unnormalized density or the log unnormalized probability
+          (see log)
+    draws : int
+          the number of samples to draw
+    init : tuple
+          the initial point
+    h : float
+          the step of the proposal
+    dfun : callable
+          the log unnormalized probability
+    log : bool
+          set True to assume log-probability (default: False)
 
-        Return
-        ----------
-        samples : list
-              list of samples"""
+    Return
+    ------
+    samples : list
+          list of samples
+
+    Examples
+    --------
+    >>> import math
+    >>> def log_gaussian(x, mu=0, sigma=1):
+    ...     return -0.5 * ((x[0] - mu) / sigma)**2
+    >>> def grad_log_gaussian(x, mu=0, sigma=1):
+    ...     return [(mu - x[0]) / sigma**2]
+    >>> samples = langevin(log_gaussian, 10000, [0], grad_log_gaussian, 
+    ...   1.0, log=True)
+    >>> mean = statistics.fmean(s[0] for s in samples)
+    >>> math.isclose(mean, 0, abs_tol=0.05)
+    True
+    """
 
     def flin(pp, p, d, dp):
         a = pp * math.exp(d)
@@ -173,29 +268,48 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
 def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
     """TMCMC sampler
 
-        Parameters
-        ----------
-        fun : callable
-               log-probability
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        lo, hi : tuples
-              the bounds of the initial distribution
-        beta : float
-              the coefficient to scale the proposal distribution
-              (default: 1)
-        return_evidence : bool
-              if true returns a tuple (samples, evidence) (default:
-              False)
-        trace : bool
-              return a trace of the algorithm (default: False)
+    Parameters
+    ----------
+    fun : callable
+           log-probability
+    draws : int
+          the number of samples to draw
+    lo, hi : tuples
+          the bounds of the initial distribution
+    beta : float
+        The coefficient to scale the proposal distribution. Larger values of
+        beta lead to larger proposal steps and potentially faster convergence,
+        but may also increase the likelihood of rejecting proposals (default
+        is 1)
+    return_evidence : bool
+        If True, return a tuple containing the samples and the
+        evidence (the logarithm of the normalization constant). If
+        False (the default), return only the samples
+    trace : bool
+        If True, return a trace of the algorithm, which is a list of
+        tuples containing the current set of samples and the number of
+        accepted proposals at each iteration. If False (the default),
+        do not return a trace.
 
-        Return
-        ----------
-        samples : list
-               a list of samples"""
+    Return
+    ------
+    samples : list
+           a list of samples
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> def log_prob(x):
+    ...     return -0.5 * sum(x**2 for x in x)
+    >>> samples = tmcmc(log_prob, 10000, [-5, -5], [5, 5])
+    >>> len(samples)
+    10000
+    >>> np.abs(np.mean(samples, axis=0)) < 0.1
+    array([ True,  True])
+
+    """
 
     def inside(x):
         for l, h, e in zip(lo, hi, x):
