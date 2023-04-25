@@ -20,4 +20,5 @@ templates_path = ['_templates']
 exclude_patterns = ['_build']
 html_theme = 'classic'
 html_static_path = ['_static']
+html_favicon = '_static/favicon.ico'
 autoclass_content = 'both'

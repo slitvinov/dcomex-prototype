@@ -3,18 +3,17 @@
    file completely to your liking, but it should at least contain the
    root `toctree` directive.
 
-DComEX Framework's documentation!
+DComEX Framework's
 ============================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   integration
    graph
+   follow
    kahan
-   follow   
-
+   integration
 
 The EU-funded DComEX project plans to develop numerical methods
 enhanced by artificial intelligence as well as a scalable software
