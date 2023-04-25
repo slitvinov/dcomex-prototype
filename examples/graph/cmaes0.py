@@ -5,10 +5,12 @@ import random
 import sys
 import scipy.linalg
 
+
 def print0(l):
     for i in l:
         sys.stdout.write("%+7.2e " % i)
     sys.stdout.write("\n")
+
 
 def frandom(x):
     return random.uniform(0, 1)

@@ -63,6 +63,13 @@ follow1.py
 
 .. image:: ../examples/graph/follow1.png
 
+korali0.py
+------------------------
+.. literalinclude:: ../examples/graph/korali0.py
+   :language: python
+
+.. image:: ../examples/graph/korali0.png
+
 langevin0.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin0.py

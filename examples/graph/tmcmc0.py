@@ -13,6 +13,9 @@ def fun(x, a, b, w, dev):
     return scipy.special.logsumexp((u + math.log(w), v + math.log(1 - w)))
 
 
+sampler = graph.tmcmc
+# sampler = graph.korali
+
 random.seed(12345)
 D = (
     ("I", 2, 0.5, 0.5),
@@ -35,10 +38,10 @@ for name, d, dev, w in D:
     smax = []
     logev = []
     for t in range(M):
-        x, S = graph.tmcmc(lambda x: fun(x, a, b, w, dev),
-                           N, [-2] * d, [2] * d,
-                           beta=beta,
-                           return_evidence=True)
+        x, S = sampler(lambda x: fun(x, a, b, w, dev),
+                       N, [-2] * d, [2] * d,
+                       beta=beta,
+                       return_evidence=True)
         cnt = 0
         for e in x:
             da = statistics.fsum((u - v)**2 for u, v in zip(e, a))

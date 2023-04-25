@@ -5,8 +5,6 @@ import sys
 conf_file_abs_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(conf_file_abs_path, ".."))
 
-import integration
-
 project = 'DComEX Framework'
 copyright = '2022, NTUA, ETHZ, CSCS'
 author = 'NTUA, ETHZ, CSCS'
