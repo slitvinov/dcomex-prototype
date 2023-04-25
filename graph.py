@@ -39,7 +39,7 @@ class Integral:
             - 'tmcmc'
             - 'korali' (WIP)
             - 'hamiltonian' (WIP)
-        **options : dict, optional
+        options : dict, optional
             A dictionary of options for the sampling algorithm.
 
         Attributes

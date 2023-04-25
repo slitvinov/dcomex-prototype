@@ -100,7 +100,7 @@ def graphviz(buf):
     None
 
     Examples
-    ----
+    --------
     >>> from io import StringIO
     >>> clear()
     >>> @follow(label='Addition')

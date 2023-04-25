@@ -33,9 +33,6 @@ coins.py
 .. literalinclude:: ../examples/graph/coins.py
    :language: python
 
-.. literalinclude:: ../examples/graph/coins.out
-   :language: sh
-
 .. image:: ../examples/graph/coins.png
 
 coins.vis.py
@@ -71,18 +68,12 @@ langevin0.py
 .. literalinclude:: ../examples/graph/langevin0.py
    :language: python
 
-.. literalinclude:: ../examples/graph/langevin0.out
-   :language: sh
-
 .. image:: ../examples/graph/langevin0.png
 
 langevin1.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin1.py
    :language: python
-
-.. literalinclude:: ../examples/graph/langevin1.out
-   :language: sh
 
 .. image:: ../examples/graph/langevin1.png
 
@@ -91,9 +82,6 @@ langevin2.py
 .. literalinclude:: ../examples/graph/langevin2.py
    :language: python
 
-.. literalinclude:: ../examples/graph/langevin2.out
-   :language: sh
-
 .. image:: ../examples/graph/langevin2.png
 
 langevin3.py
@@ -101,16 +89,10 @@ langevin3.py
 .. literalinclude:: ../examples/graph/langevin3.py
    :language: python
 
-.. literalinclude:: ../examples/graph/langevin3.out
-   :language: sh
-
 langevin4.py
 ------------------------
 .. literalinclude:: ../examples/graph/langevin4.py
    :language: python
-
-.. literalinclude:: ../examples/graph/langevin4.out
-   :language: sh
 
 .. image:: ../examples/graph/langevin4.png
 
@@ -136,9 +118,6 @@ three.py
 ------------------------
 .. literalinclude:: ../examples/graph/three.py
    :language: python
-
-.. literalinclude:: ../examples/graph/three.out
-   :language: sh
 
 .. image:: ../examples/graph/three.png
 
@@ -167,9 +146,6 @@ tmcmc2.py
 ------------------------
 .. literalinclude:: ../examples/graph/tmcmc2.py
    :language: python
-
-.. literalinclude:: ../examples/graph/tmcmc2.out
-   :language: sh
 
 .. image:: ../examples/graph/tmcmc2.png
 
