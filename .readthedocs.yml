@@ -1,9 +1,11 @@
+---
 version: 2
 python:
+   version: 2
    install:
-   - requirements: docs/requirements.txt
+      - requirements: docs/requirements.txt
 formats:
-  - pdf
-sphinx
+   - pdf
+sphinx:
    builder: singlehtml
    configuration: docs/conf.py
