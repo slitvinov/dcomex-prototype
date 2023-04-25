@@ -144,7 +144,8 @@ def metropolis(fun, draws, init, scale, log=False):
 
     Examples
     --------
-    Define a log unnormalized probability function for a standard normal distribution:
+    Define a log unnormalized probability function for a standard
+    normal distribution:
 
     >>> import math
     >>> import random
@@ -153,14 +154,19 @@ def metropolis(fun, draws, init, scale, log=False):
     >>> def log_normal(x):
     ...     return -0.5 * x[0]**2
 
-    Draw 1000 samples from the distribution starting at 0, with proposal standard deviation 1:
+    Draw 1000 samples from the distribution starting at 0, with
+    proposal standard deviation 1:
+
     >>> samples = list(metropolis(log_normal, 10000, [0], [1], log=True))
 
-    Check that the mean and standard deviation of the samples are close to 0 and 1, respectively:
+    Check that the mean and standard deviation of the samples are
+    close to 0 and 1, respectively:
+
     >>> math.isclose(statistics.fmean(s[0] for s in samples), 0, abs_tol=0.05)
     True
     >>> math.isclose(statistics.fmean(s[0]**2 for s in samples), 1, abs_tol=0.05)
     True
+
     """
 
     def flin(pp, p):
@@ -190,26 +196,40 @@ def metropolis(fun, draws, init, scale, log=False):
 def langevin(fun, draws, init, dfun, sigma, log=False):
     """Metropolis-adjusted Langevin (MALA) sampler
 
-        Parameters
-        ----------
-        fun : callable
-              the unnormalized density or the log unnormalized probability
-              (see log)
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        h : float
-              the step of the proposal
-        dfun : callable
-              the log unnormalized probability
-        log : bool
-              set True to assume log-probability (default: False)
+    Parameters
+    ----------
+    fun : callable
+          the unnormalized density or the log unnormalized probability
+          (see log)
+    draws : int
+          the number of samples to draw
+    init : tuple
+          the initial point
+    h : float
+          the step of the proposal
+    dfun : callable
+          the log unnormalized probability
+    log : bool
+          set True to assume log-probability (default: False)
 
-        Return
-        ----------
-        samples : list
-              list of samples"""
+    Return
+    ------
+    samples : list
+          list of samples
+
+    Examples
+    --------
+    >>> import math
+    >>> def log_gaussian(x, mu=0, sigma=1):
+    ...     return -0.5 * ((x[0] - mu) / sigma)**2
+    >>> def grad_log_gaussian(x, mu=0, sigma=1):
+    ...     return [(mu - x[0]) / sigma**2]
+    >>> samples = langevin(log_gaussian, 10000, [0], grad_log_gaussian, 
+    ...   1.0, log=True)
+    >>> mean = statistics.fmean(s[0] for s in samples)
+    >>> math.isclose(mean, 0, abs_tol=0.05)
+    True
+    """
 
     def flin(pp, p, d, dp):
         a = pp * math.exp(d)
@@ -248,29 +268,48 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
 def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
     """TMCMC sampler
 
-        Parameters
-        ----------
-        fun : callable
-               log-probability
-        draws : int
-              the number of samples to draw
-        init : tuple
-              the initial point
-        lo, hi : tuples
-              the bounds of the initial distribution
-        beta : float
-              the coefficient to scale the proposal distribution
-              (default: 1)
-        return_evidence : bool
-              if true returns a tuple (samples, evidence) (default:
-              False)
-        trace : bool
-              return a trace of the algorithm (default: False)
+    Parameters
+    ----------
+    fun : callable
+           log-probability
+    draws : int
+          the number of samples to draw
+    lo, hi : tuples
+          the bounds of the initial distribution
+    beta : float
+        The coefficient to scale the proposal distribution. Larger values of
+        beta lead to larger proposal steps and potentially faster convergence,
+        but may also increase the likelihood of rejecting proposals (default
+        is 1)
+    return_evidence : bool
+        If True, return a tuple containing the samples and the
+        evidence (the logarithm of the normalization constant). If
+        False (the default), return only the samples
+    trace : bool
+        If True, return a trace of the algorithm, which is a list of
+        tuples containing the current set of samples and the number of
+        accepted proposals at each iteration. If False (the default),
+        do not return a trace.
 
-        Return
-        ----------
-        samples : list
-               a list of samples"""
+    Return
+    ------
+    samples : list
+           a list of samples
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> def log_prob(x):
+    ...     return -0.5 * sum(x**2 for x in x)
+    >>> samples = tmcmc(log_prob, 10000, [-5, -5], [5, 5])
+    >>> len(samples)
+    10000
+    >>> np.abs(np.mean(samples, axis=0)) < 0.1
+    array([ True,  True])
+
+    """
 
     def inside(x):
         for l, h, e in zip(lo, hi, x):
