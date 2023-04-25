@@ -13,6 +13,10 @@ try:
     import numpy as np
 except ImportError:
     np = None
+try:
+    import korali as korali_package
+except ImportError:
+    korali_package = None
 
 
 class Integral:
@@ -37,7 +41,7 @@ class Integral:
             - 'metropolis' (default)
             - 'langevin'
             - 'tmcmc'
-            - 'korali' (WIP)
+            - 'korali'
             - 'hamiltonian' (WIP)
         options : dict, optional
             A dictionary of options for the sampling algorithm.
@@ -78,7 +82,7 @@ class Integral:
         elif method == "tmcmc":
             self.samples = tmcmc(data_given_theta, **options)
         elif method == "korali":
-            self.samples = korali_sample(data_given_theta, **options)
+            self.samples = korali(data_given_theta, **options)
         else:
             raise ValueError("Unknown sampler '%s'" % method)
 
@@ -224,7 +228,7 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
     ...     return -0.5 * ((x[0] - mu) / sigma)**2
     >>> def grad_log_gaussian(x, mu=0, sigma=1):
     ...     return [(mu - x[0]) / sigma**2]
-    >>> samples = langevin(log_gaussian, 10000, [0], grad_log_gaussian, 
+    >>> samples = langevin(log_gaussian, 10000, [0], grad_log_gaussian,
     ...   1.0, log=True)
     >>> mean = statistics.fmean(s[0] for s in samples)
     >>> math.isclose(mean, 0, abs_tol=0.05)
@@ -293,8 +297,8 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
 
     Return
     ------
-    samples : list
-           a list of samples
+    samples : list or tuple
+           a list of samples, a tuple of (samples, log-evidence), or a trace
 
     Examples
     --------
@@ -383,6 +387,69 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
             x2[i] = x[j][:]
             f2[i] = f[j]
         x2, x, f2, f = x, x2, f, f2
+
+
+def korali(fun, draws, lo, hi, beta=1, return_evidence=False):
+    """Korali TMCMC sampler
+
+    Parameters
+    ----------
+    fun : callable
+           log-probability
+    draws : int
+          the number of samples to draw
+    lo, hi : tuples
+          the bounds of the initial distribution
+    beta : float
+        The coefficient to scale the proposal distribution. Larger values of
+        beta lead to larger proposal steps and potentially faster convergence,
+        but may also increase the likelihood of rejecting proposals (default
+        is 1)
+    return_evidence : bool
+        If True, return a tuple containing the samples and the
+        evidence (the logarithm of the normalization constant). If
+        False (the default), return only the samples
+    trace : bool
+        If True, return a trace of the algorithm, which is a list of
+        tuples containing the current set of samples and the number of
+        accepted proposals at each iteration. If False (the default),
+        do not return a trace.
+
+    Return
+    ------
+    samples : list or tuple
+           a list of samples, a tuple of (samples, log-evidence), or a trace
+
+    """
+
+    if korali_package == None:
+        raise ModuleNotFoundError("korali sampler needs korali")
+
+    def fun0(ks):
+        x = ks["Parameters"]
+        ks["logLikelihood"] = fun(x)
+
+    e = korali_package.Experiment()
+    e["Random Seed"] = random.randint(1, 10000)
+    e["Problem"]["Type"] = "Bayesian/Custom"
+    e["Problem"]["Likelihood Model"] = fun0
+    e["Solver"]["Type"] = "Sampler/TMCMC"
+    e["Solver"]["Population Size"] = draws
+    e["Solver"]["Covariance Scaling"] = beta * beta
+    for i, (l, h) in enumerate(zip(lo, hi)):
+        e["Distributions"][i]["Name"] = "Uniform%d" % i
+        e["Distributions"][i]["Type"] = "Univariate/Uniform"
+        e["Distributions"][i]["Minimum"] = l
+        e["Distributions"][i]["Maximum"] = h
+        e["Variables"][i]["Name"] = "k%d" % i
+        e["Variables"][i]["Prior Distribution"] = "Uniform%d" % i
+    e["Console Output"]["Verbosity"] = "Silent"
+    e["File Output"]["Frequency"] = 9999
+    k = korali_package.Engine()
+    k.run(e)
+    samples = e["Results"]["Posterior Sample Database"]
+    evidence = e["Solver"]["Current Accumulated LogEvidence"]
+    return (samples, evidence) if return_evidence else samples
 
 
 def cmaes(fun, x0, sigma, g_max, trace=False):

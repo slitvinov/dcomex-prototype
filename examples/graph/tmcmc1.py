@@ -10,8 +10,8 @@ def gauss(x):
 
 
 random.seed(123456)
-beta = float(sys.argv[1])
-print("beta = %g" % beta)
+sampler = graph.tmcmc
+beta = 0.1
 N = 2000
 M = 50
 d = 3
@@ -22,7 +22,7 @@ var2 = []
 lo = -5
 hi = 5
 for t in range(M):
-    x = graph.tmcmc(gauss, N, d * [lo], d * [hi], beta=beta)
+    x = sampler(gauss, N, d * [lo], d * [hi], beta=beta)
     mean.append(statistics.fmean(e[0] for e in x))
     var0.append(statistics.variance(e[0] for e in x))
     var1.append(statistics.variance(e[1] for e in x))
