@@ -34,27 +34,34 @@ Usage: bio [-v] [-h] k1 mu time
 <p align="center"><img src="examples/bio/mesh.png" alt="MSolve results"/></p>
 
 ## Running manually
-To replicate CI runs manually it is possible to pull the containers by logging in to Piz Daint and execute the commands
+To replicate CI runs manually it is possible to pull the containers by
+logging in to Piz Daint and execute the commands
+
 ```
 $ module load sarus
 $ sarus pull IMAGE_NAME
 $ srun --pty -C gpu -A GROUP_ID -N1 -n1 sarus run --mpi --tty IMAGE_NAME bash
 ```
-This will drop you to a shell on the compute node inside the container. From there you can
-replicate running the commands as in `ci/prototype.yml`.
-It is important to make sure that the container image names match the naming `*/public/*`, i.e.
-they must reside in a directory named public, only then anonymous access is possible.
+This will drop you to a shell on the compute node inside the
+container. From there you can replicate running the commands as in
+`ci/prototype.yml`.  It is important to make sure that the container
+image names match the naming `*/public/*`, i.e.  they must reside in a
+directory named public, only then anonymous access is possible.
 
 ## Install as unprivileged user
 
 ```
-$ make 'USER = 1' 'PREFIX = $(HOME)/.local'
-$ bio -v 1 2 3
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lkorali
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' bin lib
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' msolve
+$ python examples/graph/korali0.py
+log evidence:  -2.490052761730272
 1.0851841319006034E-05
 $ python examples/graph/analitical.py
 graph.metropolis: accept = 0.724
 graph.metropolis: accept = 0.684
 graph.metropolis: accept = 0.7068
+$ bio -v 1 2 3
 ```
 
 ## Directory structure
@@ -68,8 +75,7 @@ graph.metropolis: accept = 0.7068
 * [kahan.py](kahan.py): Kahan summation or compensated summation algorithms
 * [integration](integration): code and configuration data used to
   integrate Msolve and korali
-* [korali](korali): git submodule for the version of korali
-  used in the framework
+* [korali](korali): a directory to build korali
 * [msolve](msolve):
   [NuGet](https://www.nuget.org)
   configuration

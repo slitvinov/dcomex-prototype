@@ -35,6 +35,7 @@ Summary
 .. autosummary::
    graph.cmaes
    graph.Integral
+   graph.korali
    graph.metropolis
    graph.tmcmc
 
@@ -44,6 +45,6 @@ Functions
 .. autoclass:: graph.Integral
 	       :special-members: __call__
 .. autofunction:: graph.cmaes
+.. autofunction:: graph.korali
 .. autofunction:: graph.metropolis
 .. autofunction:: graph.tmcmc
-

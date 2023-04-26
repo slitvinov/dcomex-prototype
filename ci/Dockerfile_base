@@ -22,12 +22,8 @@ RUN cd /tmp \
 RUN env TZ=Europe/Zurich DEBIAN_FRONTEND=noninteractive \
     apt-get -y install \
     apt-transport-https \
-    cmake \
     git \
     libgsl-dev \
-    libmkldnn-dev \
-    meson \
-    ninja-build \
     pkg-config \
     python3-dev \
     python3-matplotlib \
