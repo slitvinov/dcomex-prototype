@@ -270,7 +270,8 @@ def langevin(fun, draws, init, dfun, sigma, log=False):
 
 
 def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
-    """TMCMC sampler
+    """Generates samples from the target distribution using a transitional
+    Markov chain Monte Carlo(TMCMC) algorithm.
 
     Parameters
     ----------
