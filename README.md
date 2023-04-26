@@ -68,8 +68,7 @@ graph.metropolis: accept = 0.7068
 * [kahan.py](kahan.py): Kahan summation or compensated summation algorithms
 * [integration](integration): code and configuration data used to
   integrate Msolve and korali
-* [korali](korali): git submodule for the version of korali
-  used in the framework
+* [korali](korali): a directory to build korali
 * [msolve](msolve):
   [NuGet](https://www.nuget.org)
   configuration
