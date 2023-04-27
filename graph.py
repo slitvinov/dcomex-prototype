@@ -28,6 +28,11 @@ class Integral:
                  **options):
         """Caches the samples to evaluate the integral several times.
 
+        We follow the methodology developed in [1], also described in
+        S1.4 [2]), The advantage of this approach is that the
+        likelihoods (`theta_given_psi') not re-evaluated for each
+        value of `psi`.
+
         Parameters
         ----------
         data_given_theta : callable
@@ -55,6 +60,23 @@ class Integral:
         ------
         ValueError
             If the provided sampling method is unknown.
+
+        References
+        ----------
+
+        1. Wu, S., Angelikopoulos, P., Tauriello, G., Papadimitriou,
+        C., & Koumoutsakos, P. (2016). Fusing heterogeneous data for
+        the calibration of molecular dynamics force fields using
+        hierarchical Bayesian models. The Journal of Chemical Physics,
+        145(24), 244112.
+
+        2. Kulakova, L., Arampatzis, G., Angelikopoulos, P.,
+        Hadjidoukas, P., Papadimitriou, C., & Koumoutsakos,
+        P. (2017). Data driven inference for the repulsive exponent of
+        the Lennard-Jones potential in molecular dynamics
+        simulations. Scientific reports, 7(1), 16576. (Appendix, S1.4
+        Hierarchical Bayesian models)
+
 
         Examples
         --------
