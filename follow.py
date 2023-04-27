@@ -121,8 +121,8 @@ def graphviz(buf):
       0 [label = "Addition"]
       1 [label = "Subtraction"]
       2 [label = "foo"]
-      2 -> 1
       2 -> 0
+      2 -> 1
     }
     <BLANKLINE>
     """
@@ -137,7 +137,8 @@ def graphviz(buf):
     for i, v in enumerate(Vertices):
         Numbers[v] = i
         buf.write('  %d [label = "%s"]\n' % (i, Labels[v]))
-    for v, w in Edges:
+    key = lambda e : (Labels[e[0]], Labels[e[1]])
+    for v, w in sorted(Edges, key=key):
         buf.write("  %d -> %d\n" % (Numbers[v], Numbers[w]))
     buf.write("}\n")
 
