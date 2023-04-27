@@ -12,9 +12,9 @@ graph.py\
 kahan.py\
 
 B = \
-integration/bio\
+bin/bio\
 
-all: bin lib lmsolve
+all: bin lib
 bin: $B
 	mkdir -p -- "$(PREFIX)/bin"
 	for i in $B; do cp -- "$$i" "$(PREFIX)/bin" || exit 2; done
@@ -35,13 +35,13 @@ lkorali:
 	(cd korali && \
 		git clone --quiet --single-branch https://github.com/cselab/korali && \
 		(cd korali && git checkout c70d8e32258b7e2b9ed977576997dfe946816419) && \
-		make install CXXFLAGS_MPI= LDFLAGS_MPI= CXX=mpicxx 'USER = $(USER)' 'PREFIX = $(PREFIX)')
+		make install 'USER = $(USER)' 'PREFIX = $(PREFIX)')
 
 .sh:
 	sed 's,%mph%,"$(PREFIX)"/share/MeshCyprusTM.mphtxt,g' $< > $@
 	chmod a+x $@
 
 clean:
-	rm -f $B
+	rm -rf $B korali/korali
 	cd msolve/MSolveApp/ISAAR.MSolve.MSolve4Korali && \
 		DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet clean --nologo
