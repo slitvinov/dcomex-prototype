@@ -42,7 +42,7 @@ Install korali, integration tools, and Msolve application
 
 ```
 $ make 'USER = 1' 'PREFIX = $(HOME)/.local' lkorali
-$ make 'USER = 1' 'PREFIX = $(HOME)/.local' bin lib
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lbin lib
 $ make 'USER = 1' 'PREFIX = $(HOME)/.local' lmsolve
 ```
 

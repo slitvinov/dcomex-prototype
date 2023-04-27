@@ -14,8 +14,8 @@ kahan.py\
 B = \
 bin/bio\
 
-all: bin lib
-bin: $B
+all: lbin lib
+lbin: $B
 	mkdir -p -- "$(PREFIX)/bin"
 	for i in $B; do cp -- "$$i" "$(PREFIX)/bin" || exit 2; done
 
