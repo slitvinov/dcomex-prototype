@@ -16,24 +16,54 @@ $ ./run.sh
 $ cd /src/tests/validation/inference_heat/
 $ OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
 ```
-or
-```
-$ python3 examples/bio.py
-```
 
-To run one msolve simulation
+To run one Msolve simulation
 ```
-$ bio 0.1 0.2 1
-7.664370585504502E-11
+$ bio -v 1 2 3
+1.0851841319006034E-05
 $ bio -h
-Usage: bio [-v] [-h] k1 mu time
+Usage: bio [-v] [-c] k1 mu time
+MSolve simulation of tumor grouth
+   k1       growth rate, 1/second
+   mu       shear modulus, kPa
+   time     timestep in days (positive integer)
+Options:
+  -v        verbose output
+  -c        output MSolve confiuration file and exit
+  -h        display help and exit
 ```
 
-## Results
-<p align="center"><img src="examples/bio/bio.svg" alt="MSolve results"/></p>
-<p align="center"><img src="examples/bio/mesh.png" alt="MSolve results"/></p>
+The online documentation is at
+[ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest).
 
-## Running manually
+## Install as unprivileged user
+
+Install korali, integration tools, and Msolve application
+
+```
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lkorali
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lbin lib
+$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lmsolve
+```
+
+Run examples
+```
+$ python examples/graph/korali0.py
+log evidence:  -2.490052761730272
+1.0851841319006034E-05
+$ bio -v 1 2 3
+1.0851841319006034E-05
+$ python examples/graph/analitical.py
+graph.metropolis: accept = 0.724
+graph.metropolis: accept = 0.684
+graph.metropolis: accept = 0.7068
+```
+
+Open analitical.vis.png file
+<p align="center"><img src="examples/graph/analitical.vis.png" alt="Sampled distribution"/></p>
+
+## Running on [Piz Daint](https://www.cscs.ch/computers/piz-daint)
+
 To replicate CI runs manually it is possible to pull the containers by
 logging in to Piz Daint and execute the commands
 
@@ -48,38 +78,25 @@ container. From there you can replicate running the commands as in
 image names match the naming `*/public/*`, i.e.  they must reside in a
 directory named public, only then anonymous access is possible.
 
-## Install as unprivileged user
-
-```
-$ make 'USER = 1' 'PREFIX = $(HOME)/.local' lkorali
-$ make 'USER = 1' 'PREFIX = $(HOME)/.local' bin lib
-$ make 'USER = 1' 'PREFIX = $(HOME)/.local' msolve
-$ python examples/graph/korali0.py
-log evidence:  -2.490052761730272
-1.0851841319006034E-05
-$ python examples/graph/analitical.py
-graph.metropolis: accept = 0.724
-graph.metropolis: accept = 0.684
-graph.metropolis: accept = 0.7068
-$ bio -v 1 2 3
-```
-
 ## Directory structure
 
+* [bin](bin): integration utilities
 * [CI](ci): definition of containerised build, test and deployment
   pipelines via CI/CD at CSCS
-* [docs](docs): Sphinx documentation
+* [docs](docs): the source of the documentation
 * [examples](examples): tutorials and examples
 * [graph.py](graph.py): sample Bayesian graphs
 * [follow.py](follow.py): trace function evalution and detect loops
 * [kahan.py](kahan.py): Kahan summation or compensated summation algorithms
-* [integration](integration): code and configuration data used to
-  integrate Msolve and korali
 * [korali](korali): a directory to build korali
-* [msolve](msolve):
-  [NuGet](https://www.nuget.org)
-  configuration
 * [tests](tests): unit and integration tests
 
-The online documentation is at
-[ReadTheDocs](https://dcomex-framework-prototype.readthedocs.io/en/latest).
+Application
+
+* [msolve](msolve): Msolve application
+* [integration](integration): integration of Msolve and korali
+
+## Results
+<p align="center"><img src="examples/bio/bio.svg" alt="MSolve results"/></p>
+<p align="center"><img src="examples/bio/mesh.png" alt="MSolve results"/></p>
+

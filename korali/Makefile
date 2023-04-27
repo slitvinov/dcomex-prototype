@@ -3,17 +3,15 @@
 .SUFFIXES: .c .cpp .o
 
 PY = python3
-CXX = g++
-LINK = $(CXX)
+MPICXX = mpicxx
+LINK = $(MPICXX)
 USER = 0
 CXXFLAGS_PYBIND11 =
 CXXFLAGS_PYTHON = `pkg-config --cflags python3`
 CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
 CXXFLAGS_GSL = `pkg-config --cflags gsl`
-CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`
 
 LDFLAGS_GSL = `pkg-config --libs gsl`
-LDFLAGS_MPI = `pkg-config --libs mpi-cxx`
 
 include obj.mk
 include py.mk
@@ -24,10 +22,10 @@ all: libkorali.so
 	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
 .cpp.o:
-	$(CXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_PYTHON) $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_MPI) $(CXXFLAGS_PYBIND11) $(CXXFLAGS) $< -o $@
+	$(MPICXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_PYTHON) $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_PYBIND11) $(CXXFLAGS) $< -o $@
 
 libkorali.so: $O
-	$(LINK) -shared $O $(LDFLAGS_GSL) $(LDFLAGS_MPI) $(LDFLAGS) -o $@
+	$(LINK) -shared $O $(LDFLAGS_GSL) $(LDFLAGS) -o $@
 
 clean:
 	rm -f $O libkorali.so
