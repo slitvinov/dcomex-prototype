@@ -2,6 +2,7 @@ import graph
 import matplotlib.pylab as plt
 import subprocess
 import sys
+from timeit import default_timer as timer
 
 
 def fun(x):
@@ -81,13 +82,15 @@ if num_cores == None:
 
 lo = (0.1, 1)
 hi = (0.5, 5)
+start = timer()
 samples, S = graph.korali(fun,
                           draws=draws,
                           lo=lo,
                           hi=hi,
                           return_evidence=True,
                           num_cores=num_cores)
-print("log evidence: %g [%ld]" % (S, len(samples)))
+end = timer()
+print(num_cores, end - start)
 # plt.plot(*zip(*samples), 'o', alpha=0.5)
 # plt.xlim(lo[0], hi[0])
 # plt.ylim(lo[1], hi[1])
