@@ -35,7 +35,7 @@ lkorali:
 	(cd korali && \
 		git clone --quiet --single-branch https://github.com/cselab/korali && \
 		(cd korali && git checkout c70d8e32258b7e2b9ed977576997dfe946816419) && \
-		make install 'USER = $(USER)')
+		make install 'USER = $(USER)' 'CXXFLAGS_MPI = $(CXXFLAGS_MPI)' 'CFLAGS_MPI = $(CFLAGS_MPI)')
 
 .sh:
 	sed 's,%mph%,"$(PREFIX)"/share/MeshCyprusTM.mphtxt,g' $< > $@

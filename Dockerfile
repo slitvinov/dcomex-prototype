@@ -11,7 +11,6 @@ RUN apt-get -qq install --no-install-recommends git
 RUN apt-get -qq install --no-install-recommends libeigen3-dev
 RUN apt-get -qq install --no-install-recommends libgsl-dev
 RUN apt-get -qq install --no-install-recommends libmpich-dev
-RUN apt-get -qq install --no-install-recommends mpich
 RUN apt-get -qq install --no-install-recommends pkg-config
 RUN apt-get -qq install --no-install-recommends python3-dev
 RUN apt-get -qq install --no-install-recommends python3-matplotlib
@@ -27,4 +26,6 @@ RUN apt-get -qq update
 RUN apt-get -qq install --no-install-recommends dotnet-sdk-6.0
 RUN git clone --quiet --single-branch --depth 1 https://github.com/slitvinov/dcomex-prototype src
 WORKDIR /src
-RUN MAKEFLAGS=-j4 make lkorali lbin lib lmsolve
+RUN MAKEFLAGS=-j4 make lkorali lbin lib lmsolve \
+    'CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`' \
+    'CFLAGS_MPI = `pkg-config --cflags mpi-c`'
