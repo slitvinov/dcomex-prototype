@@ -27,12 +27,12 @@ RUN env TZ=Europe/Zurich DEBIAN_FRONTEND=noninteractive \
     pkg-config \
     python3-dev \
     python3-matplotlib \
-    python3-mpi4py \
+    python3-pip \
     python3-numpy \
     python3-pandas \
     python3-pybind11 \
     python3-scipy
-
+RUN python3 -m pip install mpi4py
 RUN cd /tmp \
   && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
   && dpkg -i packages-microsoft-prod.deb \
