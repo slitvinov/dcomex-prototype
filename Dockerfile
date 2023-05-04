@@ -26,6 +26,6 @@ RUN apt-get -qq update
 RUN apt-get -qq install --no-install-recommends dotnet-sdk-6.0
 RUN git clone --quiet --single-branch --depth 1 https://github.com/slitvinov/dcomex-prototype src
 WORKDIR /src
-RUN MAKEFLAGS=-j4 make lkorali lbin lib lmsolve \
-    'CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`' \
-    'CFLAGS_MPI = `pkg-config --cflags mpi-c`'
+RUN MAKEFLAGS=-j4 make lbin lib lmsolve make korali/.fetch
+WORKDIR /src/korali
+RUN make 'CFLAGS_MPI = `pkg-config --cflags mpi-c`' 'CXXFLAGS_MPI = `pkg-config --cflags mpi-cxx`' 'MPICXX = g++' 'MPICC = gcc'
