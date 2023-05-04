@@ -7,10 +7,11 @@ MPICXX = mpicxx
 LINK = $(MPICXX)
 USER = 0
 CXXFLAGS = -O2 -g
-CXXFLAGS_PYBIND11 =
-CXXFLAGS_PYTHON = `pkg-config --cflags python3`
 CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
 CXXFLAGS_GSL = `pkg-config --cflags gsl`
+CXXFLAGS_MPI4PY = -I"$$(dirname $$(python -c 'import mpi4py; print(mpi4py.__file__)'))/include"
+CXXFLAGS_PYBIND11 =
+CXXFLAGS_PYTHON = `pkg-config --cflags python3`
 LDFLAGS_GSL = `pkg-config --libs gsl`
 
 include obj.mk
@@ -22,7 +23,8 @@ all: libkorali.so
 	$(CC) -c -fPIC $(CFLAGS) $< -o $@
 
 .cpp.o:
-	$(MPICXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_PYTHON) $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_PYBIND11) $(CXXFLAGS) $< -o $@
+	set -x && \
+	$(MPICXX) -c -fPIC -std=c++17 -I. -Ikorali/source $(CXXFLAGS_EIGEN3) $(CXXFLAGS_GSL) $(CXXFLAGS_MPI4PY) $(CXXFLAGS_PYBIND11) $(CXXFLAGS_PYTHON) $(CXXFLAGS) $< -o $@
 
 libkorali.so: $O
 	$(LINK) -shared $O $(LDFLAGS_GSL) $(LDFLAGS) -o $@
