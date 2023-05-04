@@ -11,7 +11,7 @@ the number of logical ranks from 1 to 24. The code used for this
 experiment is shown below:
 
 ```
-for n in 1 2 4 8 12 16 24; do python3 bio0.py -d 48 -n $n -s; done
+for n in 1 2 4 8 12 16 24; do python3 bio0.py -d 48 -n $n; done
 ```
 
 <p align="center"><img src="strong.png" alt="Strong scaling plot"/></p>
@@ -22,7 +22,7 @@ and increase the total number of logical ranks:
 ```
 for n in 1 2 4 8 12 16 24
 do d=`echo $n | awk '{print 24 * $n}'`
-   python3 bio0.py -d $d -n $n -s; done
+   python3 bio0.py -d $d -n $n; done
 ```
 
 <p align="center"><img src="weak.png" alt="Weaks scaling plot"/></p>

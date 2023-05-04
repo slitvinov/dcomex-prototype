@@ -23,7 +23,7 @@ WORKDIR /
 RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O /tmp/packages-microsoft-prod.deb
 RUN dpkg --install /tmp/packages-microsoft-prod.deb
 RUN apt-get -qq update
-RUN apt-get -qq install --no-install-recommends dotnet-sdk
+RUN apt-get -qq install --no-install-recommends dotnet-sdk-6.0
 RUN git clone --quiet --single-branch --depth 1 https://github.com/slitvinov/dcomex-prototype src
 WORKDIR /src/examples/korali/
 RUN git clone --quiet --single-branch https://github.com/cselab/korali
