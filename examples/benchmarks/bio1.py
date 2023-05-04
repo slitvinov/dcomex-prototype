@@ -29,7 +29,7 @@ def fun(x):
         sys.stderr.write("bio1.py: not a float '%s'\n" % output)
         exit(1)
     sigma = 0.5
-    scale = 1e-6
+    scale = 1e-11
     if Verbose:
         sys.stderr.write("%.16e\n" % volume)
     return -((volume / scale - 5.0)**2 / sigma**2)
@@ -38,12 +38,13 @@ def fun(x):
 Surrogate = False
 Verbose = False
 draws = None
+Samples = False
 while True:
     sys.argv.pop(0)
     if not sys.argv or sys.argv[0][0] != "-" or len(sys.argv[0]) < 2:
         break
     if sys.argv[0][1] == "h":
-        sys.stderr.write("usage bio1.py [-s] [-v] -d draws\n")
+        sys.stderr.write("usage bio1.py [-s] [-v] [-o] -d draws\n")
         sys.exit(2)
     elif sys.argv[0][1] == "d":
         sys.argv.pop(0)
@@ -57,6 +58,8 @@ while True:
             sys.exit(2)
     elif sys.argv[0][1] == "s":
         Surrogate = True
+    elif sys.argv[0][1] == "m":
+        Samples = True
     elif sys.argv[0][1] == "v":
         Verbose = True
     else:
@@ -78,4 +81,8 @@ samples, S = graph.korali(fun,
                           comm=mpi4py.MPI.COMM_WORLD)
 end = timeit.default_timer()
 if mpi4py.MPI.COMM_WORLD.Get_rank() == mpi4py.MPI.COMM_WORLD.Get_size() - 1:
-    print(mpi4py.MPI.COMM_WORLD.Get_size(), end - start)
+    if Samples:
+        for k1, mu in samples:
+            print("%.16e %.16e" % (k1, mu))
+    else:
+        print(mpi4py.MPI.COMM_WORLD.Get_size(), end - start)
