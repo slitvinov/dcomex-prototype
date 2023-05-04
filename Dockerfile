@@ -5,7 +5,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update
 RUN apt-get -qq --fix-missing upgrade
 RUN apt-get -qq install --no-install-recommends apt-transport-https
-RUN apt-get -qq install --no-install-recommends cmake
 RUN apt-get -qq install --no-install-recommends g++
 RUN apt-get -qq install --no-install-recommends git
 RUN apt-get -qq install --no-install-recommends libeigen3-dev
