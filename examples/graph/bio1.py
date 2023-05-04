@@ -21,14 +21,13 @@ def fun(x):
         exit(1)
     sigma = 0.5
     scale = 1e-6
-    sys.stderr.write("%g\n" % (volume/scale))
     return -((volume / scale - 5.0)**2 / sigma**2)
 
 
 lo = (0.1, 1)
 hi = (0.5, 5)
 samples, S = graph.korali(fun,
-                          draws=100,
+                          draws=10,
                           lo=lo,
                           hi=hi,
                           return_evidence=True,
