@@ -19,18 +19,29 @@ $ OMP_NUM_THREADS=1 ./run_inference.py --num-cores 12 --num-samples 200
 
 To run one Msolve simulation
 ```
-$ bio -v 1 2 3
+$ bio 1 2 3
 1.0851841319006034E-05
 $ bio -h
-Usage: bio [-v] [-c] k1 mu time
-MSolve simulation of tumor grouth
-   k1       growth rate, 1/second
-   mu       shear modulus, kPa
-   time     timestep in days (positive integer)
+Usage: bio [-v] [-c] [-s] k1 mu time
+
+MSolve simulation of tumor growth.
+
+Positional arguments:
+  k1                   The growth rate of the tumor, in units of 1/second.
+  mu                   The shear modulus of the tumor, in units of kPa.
+  time                 The timestep to use in the simulation, in units of days.
+
 Options:
-  -v        verbose output
-  -c        output MSolve confiuration file and exit
-  -h        display help and exit
+  -v                   Print verbose output during the simulation.
+  -c                   Output the MSolve configuration file and exit.
+  -s                   Use a surrogate instead of the full simulation.
+  -h                   Display this help message and exit.
+Environment Variables:
+
+  mph                  The path to the mesh of the simulated domain,
+		       in .mph format.
+Returns:
+  The volume of the tumor, in units of cubic millimeters.
 ```
 
 The online documentation is at
