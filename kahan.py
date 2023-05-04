@@ -103,9 +103,7 @@ def cumsum(a):
 
 def sum(a):
     """
-    Cumulative sum.
-
-    Return the cumulative sum of an input sequence
+    Return the sum of iterable `a'.
 
     Parameters
     ----------
@@ -136,7 +134,7 @@ def sum(a):
 
 def mean(a):
     """
-    Cumulative mean.
+    Return the mean of iterable `a'.
 
     Return the cumulative mean of an input sequence
 

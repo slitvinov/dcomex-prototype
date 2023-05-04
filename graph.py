@@ -28,6 +28,11 @@ class Integral:
                  **options):
         """Caches the samples to evaluate the integral several times.
 
+        We follow the methodology developed in [1], also described in
+        S1.4 [2]), The advantage of this approach is that the
+        likelihoods (`theta_given_psi') not re-evaluated for each
+        value of `psi`.
+
         Parameters
         ----------
         data_given_theta : callable
@@ -55,6 +60,23 @@ class Integral:
         ------
         ValueError
             If the provided sampling method is unknown.
+
+        References
+        ----------
+
+        1. Wu, S., Angelikopoulos, P., Tauriello, G., Papadimitriou,
+        C., & Koumoutsakos, P. (2016). Fusing heterogeneous data for
+        the calibration of molecular dynamics force fields using
+        hierarchical Bayesian models. The Journal of Chemical Physics,
+        145(24), 244112.
+
+        2. Kulakova, L., Arampatzis, G., Angelikopoulos, P.,
+        Hadjidoukas, P., Papadimitriou, C., & Koumoutsakos,
+        P. (2017). Data driven inference for the repulsive exponent of
+        the Lennard-Jones potential in molecular dynamics
+        simulations. Scientific reports, 7(1), 16576. (Appendix, S1.4
+        Hierarchical Bayesian models)
+
 
         Examples
         --------
@@ -390,7 +412,7 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
         x2, x, f2, f = x, x2, f, f2
 
 
-def korali(fun, draws, lo, hi, beta=1, return_evidence=False):
+def korali(fun, draws, lo, hi, beta=1, return_evidence=False, num_cores=None, comm=None):
     """Korali TMCMC sampler
 
     Parameters
@@ -415,12 +437,17 @@ def korali(fun, draws, lo, hi, beta=1, return_evidence=False):
         tuples containing the current set of samples and the number of
         accepted proposals at each iteration. If False (the default),
         do not return a trace.
-
+    num_cores: int
+        The number of CPU cores to use for processing. If None
+        (default), the code will not run concurrently
+    comm: mpi4py.MPI.Intracomm
+        MPI communicator for distributed runs. By default, the
+        function runs in serial mode (i.e., comm=None)
     Return
     ------
     samples : list or tuple
-           a list of samples, a tuple of (samples, log-evidence), or a trace
-
+           a list of samples, a tuple of (samples, log-evidence), or a
+           trace
     """
 
     if korali_package == None:
@@ -447,6 +474,13 @@ def korali(fun, draws, lo, hi, beta=1, return_evidence=False):
     e["Console Output"]["Verbosity"] = "Silent"
     e["File Output"]["Frequency"] = 9999
     k = korali_package.Engine()
+    if comm != None:
+        k.setMPIComm(comm)
+        k["Conduit"]["Type"] = "Distributed"
+        k["Conduit"]["Ranks Per Worker"] = 1 if num_cores == None else num_cores
+    elif num_cores != None:
+        k["Conduit"]["Type"] = "Concurrent"
+        k["Conduit"]["Concurrent Jobs"] = num_cores
     k.run(e)
     samples = e["Results"]["Posterior Sample Database"]
     evidence = e["Solver"]["Current Accumulated LogEvidence"]
