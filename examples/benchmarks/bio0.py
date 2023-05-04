@@ -6,7 +6,7 @@ from timeit import default_timer as timer
 
 
 def fun(x):
-    time = 2
+    time = 1
     k1, mu = x
     if Verbose:
         sys.stderr.write("%s\n" % x)
