@@ -11,6 +11,7 @@ RUN apt-get -qq install --no-install-recommends git
 RUN apt-get -qq install --no-install-recommends libeigen3-dev
 RUN apt-get -qq install --no-install-recommends libgsl-dev
 RUN apt-get -qq install --no-install-recommends libmpich-dev
+RUN apt-get -qq install --no-install-recommends mpich
 RUN apt-get -qq install --no-install-recommends pkg-config
 RUN apt-get -qq install --no-install-recommends python3-dev
 RUN apt-get -qq install --no-install-recommends python3-matplotlib
