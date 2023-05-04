@@ -6,11 +6,11 @@ PY = python3
 MPICXX = mpicxx
 LINK = $(MPICXX)
 USER = 0
+CXXFLAGS = -O2 -g
 CXXFLAGS_PYBIND11 =
 CXXFLAGS_PYTHON = `pkg-config --cflags python3`
 CXXFLAGS_EIGEN3 = `pkg-config --cflags eigen3`
 CXXFLAGS_GSL = `pkg-config --cflags gsl`
-
 LDFLAGS_GSL = `pkg-config --libs gsl`
 
 include obj.mk

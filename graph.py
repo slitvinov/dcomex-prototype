@@ -412,7 +412,7 @@ def tmcmc(fun, draws, lo, hi, beta=1, return_evidence=False, trace=False):
         x2, x, f2, f = x, x2, f, f2
 
 
-def korali(fun, draws, lo, hi, beta=1, return_evidence=False, num_cores=None):
+def korali(fun, draws, lo, hi, beta=1, return_evidence=False, num_cores=None, comm=None):
     """Korali TMCMC sampler
 
     Parameters
@@ -439,13 +439,15 @@ def korali(fun, draws, lo, hi, beta=1, return_evidence=False, num_cores=None):
         do not return a trace.
     num_cores: int
         The number of CPU cores to use for processing. If None
-        (default), the code will not run concurrently.
-
+        (default), the code will not run concurrently
+    comm: mpi4py.MPI.Intracomm
+        MPI communicator for distributed runs. By default, the
+        function runs in serial mode (i.e., comm=None)
     Return
     ------
     samples : list or tuple
-           a list of samples, a tuple of (samples, log-evidence), or a trace
-
+           a list of samples, a tuple of (samples, log-evidence), or a
+           trace
     """
 
     if korali_package == None:
@@ -472,7 +474,11 @@ def korali(fun, draws, lo, hi, beta=1, return_evidence=False, num_cores=None):
     e["Console Output"]["Verbosity"] = "Silent"
     e["File Output"]["Frequency"] = 9999
     k = korali_package.Engine()
-    if num_cores != None:
+    if comm != None:
+        k.setMPIComm(comm)
+        k["Conduit"]["Type"] = "Distributed"
+        k["Conduit"]["Ranks Per Worker"] = 1 if num_cores == None else num_cores
+    elif num_cores != None:
         k["Conduit"]["Type"] = "Concurrent"
         k["Conduit"]["Concurrent Jobs"] = num_cores
     k.run(e)

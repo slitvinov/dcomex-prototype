@@ -2,13 +2,13 @@ import graph
 import matplotlib.pylab as plt
 import subprocess
 import sys
-
+import mpi4py.MPI
 
 def fun(x):
     time = 3
     k1, mu = x
     sys.stderr.write("%s\n" % x)
-    command = ["bio", "%.16e" % k1, "%.16e" % mu, "%d" % time]
+    command = ["bio", "-s", "%.16e" % k1, "%.16e" % mu, "%d" % time]
     try:
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
@@ -31,11 +31,11 @@ samples, S = graph.korali(fun,
                           lo=lo,
                           hi=hi,
                           return_evidence=True,
-                          num_cores=4)
+                          comm=mpi4py.MPI.COMM_WORLD)
 print("log evidence: ", S)
 plt.plot(*zip(*samples), 'o', alpha=0.5)
 plt.xlim(-5, 5)
 plt.ylim(-5, 5)
 plt.xlabel("a")
 plt.ylabel("b")
-plt.savefig("bio.png")
+plt.savefig("bio1.png")
