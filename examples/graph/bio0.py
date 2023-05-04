@@ -5,10 +5,16 @@ import sys
 
 
 def fun(x):
-    time = 3
+    time = 2
     k1, mu = x
-    sys.stderr.write("%s\n" % x)
-    command = ["bio", "%.16e" % k1, "%.16e" % mu, "%d" % time]
+    if Verbose:
+        sys.stderr.write("%s\n" % x)
+    command = ["bio"]
+    if Surrogate:
+        command.append("-s")
+    command.append("%.16e" % k1)
+    command.append("%.16e" % mu)
+    command.append("%d" % time)
     try:
         output = subprocess.check_output(command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError:
@@ -20,22 +26,71 @@ def fun(x):
     except ValueError:
         sys.stderr.write("bio.py: not a float '%s'\n" % output)
         exit(1)
-    sys.stderr.write("%g\n" % volume)
-    return -(volume / 1e-7 - 1)**2
+    sigma = 0.5
+    scale = 1e-6
+    if Verbose:
+        sys.stderr.write("%.16e\n" % volume)
+    return -((volume / scale - 5.0)**2 / sigma**2)
 
+
+Surrogate = False
+Verbose = False
+draws = None
+num_cores = None
+while True:
+    sys.argv.pop(0)
+    if not sys.argv or sys.argv[0][0] != "-" or len(sys.argv[0]) < 2:
+        break
+    if sys.argv[0][1] == "h":
+        sys.stderr.write("usage bio0.py -d draws\n")
+        sys.exit(2)
+    elif sys.argv[0][1] == "n":
+        sys.argv.pop(0)
+        if not sys.argv:
+            sys.stderr.write("bio0.py: error: option -n needs an argument\n")
+            sys.exit(2)
+        try:
+            num_cores = int(sys.argv[0])
+        except ValueError:
+            sys.stderr.write("bio0: not an integer '%s'\n" % sys.argv[0])
+            sys.exit(2)
+    elif sys.argv[0][1] == "d":
+        sys.argv.pop(0)
+        if not sys.argv:
+            sys.stderr.write("bio0.py: error: option -d needs an argument\n")
+            sys.exit(2)
+        try:
+            draws = int(sys.argv[0])
+        except ValueError:
+            sys.stderr.write("bio0: not an integer '%s'\n" % sys.argv[0])
+            sys.exit(2)
+    elif sys.argv[0][1] == "s":
+        Surrogate = True
+    elif sys.argv[0][1] == "v":
+        Verbose = True
+    else:
+        sys.stderr.write("bio0.py: error: unknown option '%s'\n" % sys.argv[0])
+        sys.exit(2)
+sys.argv.append('')
+if draws == None:
+    sys.stderr.write("bio0.py: -d is not set\n")
+    sys.exit(2)
+if num_cores == None:
+    sys.stderr.write("bio0.py: -n is not set\n")
+    sys.exit(2)
 
 lo = (0.1, 1)
 hi = (0.5, 5)
 samples, S = graph.korali(fun,
-                          draws=10,
+                          draws=draws,
                           lo=lo,
                           hi=hi,
                           return_evidence=True,
-                          num_cores=4)
-print("log evidence: ", S)
-plt.plot(*zip(*samples), 'o', alpha=0.5)
-plt.xlim(-5, 5)
-plt.ylim(-5, 5)
-plt.xlabel("a")
-plt.ylabel("b")
-plt.savefig("bio0.png")
+                          num_cores=num_cores)
+print("log evidence: %g [%ld]" % (S, len(samples)))
+# plt.plot(*zip(*samples), 'o', alpha=0.5)
+# plt.xlim(lo[0], hi[0])
+# plt.ylim(lo[1], hi[1])
+# plt.xlabel("k1, 1/second")
+# plt.ylabel("mu, kPa")
+# plt.savefig("bio1.png")

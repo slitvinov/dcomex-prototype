@@ -1,6 +1,7 @@
 import graph
 import matplotlib.pylab as plt
 
+
 def fun(x):
     a, b = x
     return -a**2 - (b / 2)**2

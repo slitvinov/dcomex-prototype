@@ -4,6 +4,7 @@ import subprocess
 import sys
 import mpi4py.MPI
 
+
 def fun(x):
     time = 3
     k1, mu = x
@@ -32,7 +33,7 @@ samples, S = graph.korali(fun,
                           hi=hi,
                           return_evidence=True,
                           comm=mpi4py.MPI.COMM_WORLD)
-if  mpi4py.MPI.COMM_WORLD.Get_rank() == mpi4py.MPI.COMM_WORLD.Get_size() - 1:
+if mpi4py.MPI.COMM_WORLD.Get_rank() == mpi4py.MPI.COMM_WORLD.Get_size() - 1:
     print("log evidence: %g [%ld]" % (S, len(samples)))
     plt.plot(*zip(*samples), 'o', alpha=0.5)
     plt.xlim(lo[0], hi[0])
